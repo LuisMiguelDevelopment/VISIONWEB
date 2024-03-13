@@ -9,4 +9,4 @@ export const DB_USER = process.env.DB_USER ?? 'VISIONWEB';
 export const DB_PASSWORD = process.env.DB_PASSWORD ?? '1001470143'
 export const DB_synchronize = process.env.DB_synchronize ?? true
 export const DB_trustServerCertificate = process.env.DB_trustServerCertificate ?? true
-
+export const TOKEN_SECRET = '1001470143VISIONWEB';
