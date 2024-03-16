@@ -1,16 +1,21 @@
 import { Router } from 'express';
-import { getUsers, registerUser , loginUser } from '../controllers/users.controller.js';
-import { CheckEmailExistRegister , hashPassword , comparePassword} from '../middlewares/user.Middleware.js';
+import { getUsers, registerUser , loginUser, logout , sendRecoveryEmail, resetPassword } from '../controllers/users.controller.js';
+import { CheckEmailExistRegister , hashPassword, hashNewPassword , comparePassword , verifyToken} from '../middlewares/user.Middleware.js';
 const router = Router();
 
 /* GET */
-router.get('/users' , getUsers);
-
+router.get('/users', getUsers);
+router.get('/verify' , verifyToken);
 
 /* POST */
 
 router.post('/register', CheckEmailExistRegister, hashPassword , registerUser)
-router.post('/login', comparePassword , loginUser)
+router.post('/login' ,comparePassword , loginUser)
+router.post('/logout' , logout)
+router.post('/Recovery-password' , sendRecoveryEmail)
+
+/* PUT */
+router.put('/reset-password' ,hashNewPassword, resetPassword)
 
 
 export default router;
