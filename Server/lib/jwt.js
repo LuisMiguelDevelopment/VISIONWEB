@@ -9,7 +9,7 @@ export const createTokenAccess =(payload)=>{
             payload,
             TOKEN_SECRET,
             {
-                expiresIn:"200d"    
+                expiresIn:"200d"  
             },
             (err,token)=>{
                 if(err) reject(err);

@@ -7,6 +7,7 @@ import { PORT } from './config/config.js';
 
 /* ROUTES */
 import userRoutes from './routes/user.routes.js'
+import friendRoutes from './routes/friends.routes.js'
 
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(cookieParser());
 /* use routes */
 
 app.use('/api' , userRoutes);
+app.use('/api' , friendRoutes);
 
 connectionDB();
 

@@ -67,18 +67,22 @@ export const CheckEmailExistRegister = async (req, res, next) => {
 
   }
 
-export const requiredUser =(req , res, next)=>{
-    const {token} = req.cookies;
-    console.log(token);
-    if(!token) return res.status(401).json({message: "No token , Authorization denied"});
+  export const requiredUser = (req, res, next) => {
+    const token = req.cookies.token;
 
-    jwt.verify(token , TOKEN_SECRET, (err , user)=>{
-        if(err) res.status(403).json({message:'Invalid token'});
-        req.user = user;
+    if (!token) {
+        return res.status(401).json({ message: "No token, Authorization denied" });
+    }
+
+    try {
+        const decoded = jwt.verify(token, TOKEN_SECRET);
+        console.log(decoded)
+        req.user = decoded; // Asegúrate de que el ID de usuario está presente en el token
         next();
-    })
-}
-
+    } catch (error) {
+        return res.status(403).json({ message: 'Invalid token' });
+    }
+};
 
 // Middleware para comparar la contraseña del usuario con la almacenada en la base de datos
 export const comparePassword = async (req, res, next) => {
@@ -115,18 +119,24 @@ export const comparePassword = async (req, res, next) => {
 };
 
 
-export const verifyToken = async (req , res , next)=>{
+export const verifyToken = async (req, res, next) => {
   const { token } = req.cookies;
-  
+
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized ran" });
   }
 
   jwt.verify(token, TOKEN_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Unauthorized ran" });
     }
 
-    return res.json(decoded); // Devuelve los datos decodificados del usuario
+    // Decodificar el token y extraer el UserId
+    const { Email, UserId } = decoded;
+
+    // Adjuntar el UserId al objeto req.user
+    req.user = { Email, UserId };
+
+    next(); // Pasamos al siguiente middleware o controlador
   });
-}
+};
