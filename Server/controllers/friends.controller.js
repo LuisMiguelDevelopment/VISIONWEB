@@ -1,7 +1,28 @@
 import { poolBody } from "../config/db.js";
 
+export const ListFriends = async (req, res) => {
+  const userId = req.user.UserId;
 
+  try {
+    const connection = await poolBody.connect();
+    const request = connection.request();
 
+    request.input("userId", userId);
+
+    const friendList = await request.query(
+      `SELECT u.NameUser, u.LastName
+       FROM Users u
+       JOIN FriendsList fl ON (u.UserId = fl.UserId1 OR u.UserId = fl.UserId2)
+       WHERE u.UserId != @userId AND (fl.UserId1 = @userId OR fl.UserId2 = @userId)`
+    );
+
+    await connection.close();
+    return res.status(200).json({ friendList: friendList.recordset });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error getting friend list" });
+  }
+};
 
 export const getFriendRequest = async (req, res) => {
   const userId = req.user.UserId;
@@ -69,7 +90,6 @@ export const sendFriendRequest = async (req, res) => {
   }
 };
 
-
 export const acceptFriendRequest = async (req, res) => {
   const requestId = parseInt(req.params.requestId);
   const userId = req.user.UserId;
@@ -109,7 +129,11 @@ export const acceptFriendRequest = async (req, res) => {
       return res.status(404).json({ message: "One or more users not found" });
     }
 
-    const updateRows = await updateFriendRequestStatus(requestId, "ACCEPTED", connection); // Pass the connection
+    const updateRows = await updateFriendRequestStatus(
+      requestId,
+      "ACCEPTED",
+      connection
+    ); // Pass the connection
 
     if (updateRows > 0) {
       const requestInsert = connection.request();
@@ -144,5 +168,27 @@ const updateFriendRequestStatus = async (requestId, status, connection) => {
   } catch (error) {
     console.log(error);
     throw error;
+  }
+};
+
+export const deleteFriend = async (userId, friendId) => {
+  try {
+    const connection = await poolBody.connect();
+    const request = connection.request();
+
+    request.input("userId", userId);
+    request.input("friendId", friendId);
+
+    await request.query(`DELETE FROM Friends 
+      WHERE (UserId1 = @userId AND UserId2 = @friendId) 
+      OR (UserId1 = @friendId AND UserId2 = @userId);`);
+
+    await connection.close();
+
+    console.log("Friend remove successfully");
+    res.status(200).json({ message: "Friend remove successfully" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error delete Friend" });
   }
 };
