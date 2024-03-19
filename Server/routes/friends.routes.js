@@ -1,6 +1,6 @@
 import {Router} from 'express';
 
-import { getFriendRequest, sendFriendRequest  , acceptFriendRequest, ListFriends} from '../controllers/friends.controller.js';
+import { getFriendRequest, sendFriendRequest  , acceptFriendRequest, ListFriends, deleteFriend, deleteRequestFriend} from '../controllers/friends.controller.js';
 import { requiredUser , verifyToken } from '../middlewares/user.Middleware.js';
 const router = Router();
 
@@ -14,5 +14,12 @@ router.post('/friends/add-friends', verifyToken,requiredUser , sendFriendRequest
 /* PUT */
 
 router.put('/friends/accept-request/:requestId', verifyToken , requiredUser , acceptFriendRequest);
+
+
+/* DELETE */
+
+router.delete('/friends/delete-request/:requestId' , verifyToken , requiredUser , deleteRequestFriend)
+router.delete('/friends/delete-friend/:friendId' , verifyToken , requiredUser , deleteFriend)
+
 
 export default router;

@@ -153,6 +153,48 @@ export const acceptFriendRequest = async (req, res) => {
   }
 };
 
+export const deleteRequestFriend = async (req, res) => {
+  const requestId = parseInt(req.params.requestId);
+  const userId = req.user.UserId;
+  try {
+
+    const connection =  await poolBody.connect();
+    const request = connection.request();
+
+    if(!requestId || isNaN(requestId)){
+      await connection.close();
+      return res.status(400).json({message: "Invalid request ID"})
+    }
+
+    request.input('requestId', requestId);
+
+    const requestDetails = await request.query(`
+    SELECT RequestingUserId, RequestedUserId
+    FROM Friends
+    WHERE FriendRequestId = @requestId`);
+
+    if(requestDetails.recordset.length === 0){
+      await connection.close();
+      return res.status(404).json({message:"Request not found"});
+    }
+
+    request.input("UserId", userId);
+
+    await request.query(`
+    DELETE FROM Friends
+    WHERE FriendRequestId = @requestId
+    AND (RequestingUserId = @userId OR RequestedUserId = @userId)`);
+
+    await connection.close();
+
+    res.status(200).json({message:"Delete request successfully"});
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error delete request friend" });
+  }
+};
+
 const updateFriendRequestStatus = async (requestId, status, connection) => {
   try {
     const request = connection.request();
@@ -171,24 +213,52 @@ const updateFriendRequestStatus = async (requestId, status, connection) => {
   }
 };
 
-export const deleteFriend = async (userId, friendId) => {
+export const deleteFriend = async (req, res) => {
+  const userId = req.user.UserId;
+  const friendId = parseInt(req.params.friendId);
+
   try {
     const connection = await poolBody.connect();
     const request = connection.request();
 
-    request.input("userId", userId);
-    request.input("friendId", friendId);
 
-    await request.query(`DELETE FROM Friends 
-      WHERE (UserId1 = @userId AND UserId2 = @friendId) 
-      OR (UserId1 = @friendId AND UserId2 = @userId);`);
+    if(friendId === userId){
+      return res.status(401).json({message:"Invalid user ID"})
+    }
+
+    request.input("userId1", userId);
+    request.input("userId2", friendId);
+
+    const friendListCheck = await request.query(`
+    SELECT COUNT(*) AS friendCount
+    FROM FriendsList 
+    WHERE (UserId1 = @userId1 OR UserId2 = @userId1)`);
+
+    const friendCount = friendListCheck.recordset[0].friendCount;
+
+    if (friendCount === 0) {
+      await connection.close();
+      return res.status(404).json({ message: "No friends to delete" });
+    }
+
+    await request.query(`
+      DELETE FROM FriendsList 
+      WHERE (UserId1 = @userId1 AND UserId2 = @userId2) 
+      OR (UserId1 = @userId2 AND UserId2 = @userId1)
+    `);
+
+    await request.query(`
+    DELETE FROM Friends
+    WHERE (RequestingUserId = @userId1 AND RequestedUserId = @userId2)
+    OR (RequestingUserId = @userId2 AND RequestedUserId = @userId1)
+    `);
 
     await connection.close();
 
-    console.log("Friend remove successfully");
-    res.status(200).json({ message: "Friend remove successfully" });
+    console.log("Friend removed successfully");
+    return res.status(200).json({ message: "Friend removed successfully" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Error delete Friend" });
+    return res.status(500).json({ message: "Error deleting friend" });
   }
 };
