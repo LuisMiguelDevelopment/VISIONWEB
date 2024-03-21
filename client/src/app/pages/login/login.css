@@ -1,0 +1,32 @@
+.h1{
+   color: #2381E9;
+}
+
+.pages__login {
+  background-color: #74acf0;
+  flex-direction: column;
+}
+
+.color__blue {
+  background-color: #ffffff;
+  width: 50vw;
+  height: 100vh;
+  order: 2;
+  justify-self: flex-end;
+}
+
+.form__container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.Link{
+    margin-top:20px;
+    color: #38A89A;
+}
+
+.button{
+    width: 80px;
+}

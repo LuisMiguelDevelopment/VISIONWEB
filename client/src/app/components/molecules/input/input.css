@@ -1,0 +1,28 @@
+@font-face {
+    font-family: 'inter-bold';
+    src: url('../../../../../public/fonts/Inter-SemiBold.ttf');
+}
+
+
+.input-container{
+    border: 2px solid #1265c357 ;
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-radius: 15px;
+    color:  #74acf0;
+
+}
+
+.input{
+    border: none;
+    outline: none;
+    flex-grow: 1;
+}
+
+.input::placeholder{
+    font-weight: bold;
+    font-family: 'inter-bold';
+    color:  #74acf0;
+}
+

@@ -1,13 +1,16 @@
-import { Inter } from "next/font/google";
+import localFont from 'next/font/local' ;
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
-
+const interRegular = localFont({
+  src: [
+    { path: '../../public/fonts/Inter-SemiBold.ttf' , weight: '600' } // Semi-bold weight
+  ],
+});
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={interRegular.className}>{children}</body>
     </html>
   );
 }

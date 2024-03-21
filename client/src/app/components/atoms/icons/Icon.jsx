@@ -27,7 +27,7 @@ const Icon = ({type})=>{
         {type === 'mail' && <MdOutlineMailOutline/> }
         {type === 'eye' && <LuEye/> }
         {type === 'calendar' && <FaRegCalendarAlt/> }
-        {type === 'visionweb' && <Image src={visionweb} width={50} height={50} alt="logo vision web"/>}
+        {type === 'visionweb' && <Image src={visionweb} width={40} height={40} alt="logo vision web"/>}
 
         {/* ICONS FORMS */}
         </>
