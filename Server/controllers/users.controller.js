@@ -81,7 +81,7 @@ export const loginUser = async (req, res) => {
     const token = await createTokenAccess({ Email, UserId });
     
     // Establecer el token en la cookie de la respuesta
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, { httpOnly: true , secure:true });
 
     return res.status(200).json({
       Email,

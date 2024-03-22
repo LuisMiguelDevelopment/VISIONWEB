@@ -5,20 +5,7 @@ export default function Login() {
     <div className="pages__login">
       <div className="color__white"></div>
       <div className="form__container">
-        <FormLogin
-          level={"h1"}
-          text1={"L"}
-          type={"visionweb"}
-          level2={"h1"}
-          text2={"gin"}
-          typeInput={["email", "password"]}
-          placeholders={["Email", "Password"]}
-          typeIcons={["mail", "eye"]}
-          to={'ss'}
-          textLink={'Forgot your password?'}
-          textButton={"Send"}
-          variant={"buttonBlue"}
-        />
+        <FormLogin/>
       </div>
       <div className="color__blue"></div>
     </div>
