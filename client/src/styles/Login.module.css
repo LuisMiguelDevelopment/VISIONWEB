@@ -1,0 +1,111 @@
+.page_login {
+  background: linear-gradient(to right, #ffffff 50%, #74acf0 50%);
+  flex-direction: column;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.color_white {
+  height: 100vh;
+}
+
+
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  padding: 50px 20px;
+  border-radius: 15px;
+  border: 7px solid #74acf052;
+  width: 400px;
+}
+
+.login_title{
+    display: flex;
+    color: #2381E9;
+    font-size: 1.5rem;
+    align-items: center;
+}
+
+.inputs{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.container_input{
+    border: 2px solid #1265c357 ;
+    display: flex;
+    align-items: center;
+    border-radius: 15px;
+    color:  #74acf0;
+    margin-top: 30px;
+    width: 100%;
+}
+
+.input{
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    color: rgb(49, 49, 49);
+    margin: 0px 10px;
+    height: 45px;
+
+}
+
+.icon{
+    margin-right: 10px;
+}
+
+
+.input::placeholder{
+    font-weight: bold;
+    font-family: 'inter';
+    color:  #74acf0;
+}
+
+.p{
+    font-size: 0.8rem;
+    color: #38A89A;
+    margin: 20px 0;
+}
+
+.button{
+    border: none;
+    color: white;
+    border-radius: 30px;
+    background-color: #2381E9;
+    padding: 15px 20px;
+}
+
+.button:hover{
+    background-color: #74acf0;
+}
+
+@media screen and (max-width: 400px) {
+    .form{
+       width: 320px;
+    }
+
+}
+
+
+@media screen and (max-height: 450px) { 
+   
+     .page_login {
+        height: 800px;
+      }
+      
+      
+}
+
+
+
+
+
+

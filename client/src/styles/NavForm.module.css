@@ -1,0 +1,54 @@
+.navbar {
+  position: fixed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 50px 100px;
+  width: 100%;
+  z-index: 100;
+  height: 100px;
+  backdrop-filter: blur(5px);
+}
+
+.ul {
+  display: flex;
+  align-items: center;
+}
+
+.li {
+  margin: 0 20px;
+  font-size: 1.5rem;
+  color: #ffff;
+}
+
+
+.active{
+    color: #181818;
+}
+
+
+.link{
+    color: white;
+}
+
+
+
+@media screen and (max-width: 400px) {
+  .navbar {
+    display: flex;  
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+    padding: 10px;
+  }
+
+  .li {
+    margin: 0 5px;
+    font-size: 1.5rem;
+    color: #ffff;
+  }
+}
+
+
+
+
