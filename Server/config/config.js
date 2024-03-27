@@ -10,6 +10,7 @@ export const DB_PASSWORD = process.env.DB_PASSWORD;
 export const DB_synchronize = process.env.DB_synchronize ?? true;
 export const DB_trustServerCertificate = process.env.DB_trustServerCertificate ?? true; 
 export const TOKEN_SECRET = process.env.TOKEN_SECRET;
+export const BASE_URL = process.env.BASE_URL;
 
 const USER_EMAIL = process.env.USER_EMAIL ;
 const USER_PASS = process.env.USER_PASS ;

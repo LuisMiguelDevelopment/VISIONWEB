@@ -1,0 +1,29 @@
+
+.container_search{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    border-radius: 20px;
+}
+
+.input{
+    border: none;
+    outline: none;
+    margin: 0px 30px;
+    height: 50px;
+    width: 100%;
+}
+
+.icon{
+    font-size: 50px;
+    margin-right: 10px;
+}
+
+
+.input::placeholder{
+    font-weight: bold;
+    font-family: 'inter';
+    color:  #9F9F9F;
+    font-size: 0.9rem;
+}

@@ -1,46 +1,27 @@
 import { poolBody } from "../config/db.js";
 
 export const handleCall = (io) => {
+  const connectedUsers = {};
+
   io.on("connection", (socket) => {
-    socket.emit("me", socket.id);
-    let peerId;
-    let startTime;
+    const userId = socket.request._query.UserId; // Obtener el UserId desde el socket
+    connectedUsers[userId] = true;
+    emitConnectedUsers();
 
-    socket.on("disconnect", async () => {
-      if (peerId) {
-        const endTime = new Date();
-        const callHistoryCreated = await createCallHistory(
-          peerId,
-          socket.id,
-          startTime,
-          endTime
-        );
-      }
-      socket.broadcast.emit("callEnded");
+    socket.on("disconnect", () => {
+      delete connectedUsers[userId];
+      emitConnectedUsers();
     });
 
-    socket.on("callUser", async (data) => {
-      const userId = data.from;
-      const areFriends = await checkFriendship(userId, data.userToCall);
-      if (!areFriends) {
-        socket.emit("callNotAllowed", {
-          message: "You are not friends with this user",
-        });
-        return;
-      }
-
-      peerId = userId;
-      startTime = new Date();
-      io.to(data.userToCall).emit("callUser", {
-        signal: data.signalData,
-        from: userId,
-        name: data.name,
-      });
-    });
-    socket.on("answerCall", (data) => {
-      io.to(data.to).emit("callAccepted", data.signal);
-    });
+    // Resto del código para manejar las llamadas...
   });
+
+  async function emitConnectedUsers() {
+    console.log("Connected users:", Object.keys(connectedUsers));
+    io.emit("connectedUsers", Object.keys(connectedUsers));
+  }
+
+  // Resto del código para manejar las llamadas...
 
   async function checkFriendship(userId1, userId2) {
     try {
@@ -61,25 +42,25 @@ export const handleCall = (io) => {
     }
   }
 
-  async function createCallHistory(callerId, calleId, startTime, endTime) {
+  async function createCallHistory(callerId, calleeId, startTime, endTime) {
     const duration = Math.floor((endTime - startTime) / 1000);
     try {
-      const connection = await poolBody.connect();
-      const request = connection.request();
+        const connection = await poolBody.connect();
+        const request = connection.request();
 
-      request.input("CallerId", callerId);
-      request.input("CalleeId", calleeId);
-      request.input("StartTime", startTime);
-      request.input("EndTime", endTime);
-      request.input("Duration", duration);
-      await request.query(
-        "INSERT INTO CallHistory (CallerId, CalleeId, StartTime, EndTime, Duration) VALUES (@CallerId, @CalleeId, @StartTime, @EndTime, @Duration)"
-      );
-      await connection.close();
-      return true;
+        request.input("CallerId", callerId);
+        request.input("CalleeId", calleeId);
+        request.input("StartTime", startTime);
+        request.input("EndTime", endTime);
+        request.input("Duration", duration);
+        await request.query(
+            "INSERT INTO CallHistory (CallerId, CalleeId, StartTime, EndTime, Duration) VALUES (@CallerId, @CalleeId, @StartTime, @EndTime, @Duration)"
+        );
+        await connection.close();
+        return true;
     } catch (error) {
-      console.error("Error creatin call histoy: ", error);
-      return false;
+        console.error("Error creating call history: ", error);
+        return false;
     }
   }
 };

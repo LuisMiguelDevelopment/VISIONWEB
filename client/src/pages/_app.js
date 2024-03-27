@@ -1,11 +1,15 @@
 import "@/styles/globals.css";
 import { AuthProvider } from "../context/authContext";
+import { FriendProvider } from "@/context/friendContext";
+
 export default function App({ Component, pageProps }) {
   return (
     <>
       <AuthProvider>
-        <Component {...pageProps} />
+        <FriendProvider>
+          <Component {...pageProps} />
+        </FriendProvider>
       </AuthProvider>
     </>
-  )
+  );
 }

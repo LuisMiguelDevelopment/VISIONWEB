@@ -15,9 +15,9 @@ router.get('/users', getUsers);
 router.post('/register', CheckEmailExistRegister, hashPassword, registerUser);
 router.post('/login',validateSchema(loginSchema) , comparePassword, loginUser);
 router.post('/logout', logout);
-router.post('/Recovery-password', sendRecoveryEmail);
+router.post('/recovery-password', sendRecoveryEmail);
 
 /* PUT */
-router.put('/reset-password', requiredUser, hashNewPassword, resetPassword);
+router.put('/reset-password', hashNewPassword, resetPassword);
 
 export default router;

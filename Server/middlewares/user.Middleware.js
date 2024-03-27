@@ -53,8 +53,9 @@ export const CheckEmailExistRegister = async (req, res, next) => {
     }
 
   }
-  export const hashNewPassword = async (req, res , next)=>{
-    const {newPassword} = req.body;
+  export const hashNewPassword = async (req, res, next) => {
+    const { newPassword } = req.body;
+    console.log("New password received:", newPassword); // Agregar este log
 
     try {
        const passwordHash = await bcrypt.hash(newPassword , 10)
@@ -64,8 +65,7 @@ export const CheckEmailExistRegister = async (req, res, next) => {
         console.log(error);
         return res.status(500).json({message:"Error hash password"})
     }
-
-  }
+}
 
   export const requiredUser = (req, res, next) => {
     const token = req.cookies.token;

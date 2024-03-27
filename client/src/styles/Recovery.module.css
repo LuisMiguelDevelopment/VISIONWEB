@@ -1,0 +1,72 @@
+.general{
+    background: linear-gradient(to right, #ffffff 50%, #74acf0 50%);
+}
+
+.container_form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+
+.form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    padding: 50px 20px;
+    border-radius: 15px;
+    border: 7px solid #74acf052;
+    width: 400px;
+}
+
+
+.form_title{
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #2381E9;
+}
+
+.h1_password{
+    font-size: 1.4rem;
+    color: #2381E9;
+}
+
+.img{
+    margin: 10px 6px;
+}
+
+.inputs{
+    width: 100%;
+}
+
+
+
+
+
+.button{
+    border: none;
+    color: white;
+    border-radius: 30px;
+    background-color: #2381E9;
+    padding: 15px 20px;
+    margin-top: 20px;
+}
+
+.button:hover{
+    background-color: #74acf0;
+}
+
+.icon{
+    margin-right: 10px;
+}
+
+.input::placeholder{
+    font-weight: bold;
+    font-family: 'inter';
+    color:  #74acf0;
+}
+

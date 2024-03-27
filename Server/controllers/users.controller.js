@@ -1,7 +1,7 @@
 import { poolBody } from "../config/db.js";
 import { createTokenAccess, createRandomString } from "../lib/jwt.js";
 import { transporter } from "../config/config.js";
-
+import { config } from "dotenv";
 
 // Función para escapar caracteres especiales en una cadena SQL
 const escapeString = (value) => {
@@ -136,14 +136,14 @@ export const sendRecoveryEmail = async (req, res) => {
     );
 
     const mailOptions = {
-      from: '"Your Application" <noreply@yourapp.com>',
+      from: '"Vision Web" <noreply@yourapp.com>',
       to: Email,
       subject: "Password Recovery for Your Application Account",
       html: `
         <p>Hello,</p>
         <p>You have requested to recover your password for your account associated with the email address ${Email}.</p>
         <p>To reset your password, please click on the following link within the next 24 hours:</p>
-        <a href="${process.env.BASE_URL}/reset-password?token=${token}">Reset Password</a>
+        <a href="${process.env.BASE_URL}/updatePassword?token=${token}">Reset Password</a>
         <p>If you did not request a password reset, please ignore this email.</p>
         <p>Sincerely,</p>
         <p>The Your Application Team</p>
@@ -186,7 +186,7 @@ export const resetPassword = async (req, res) => {
 
     await request.query(
       "UPDATE Users SET PasswordKey = @newPassword, RecoveryToken = NULL, RecoveryTokenExpiry = NULL WHERE RecoveryToken = @token",
-      { newPassword, token }
+      { newPassword: newPassword, token: token }
     );
 
     await connection.close();

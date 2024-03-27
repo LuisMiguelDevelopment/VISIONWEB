@@ -1,14 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/authContext";
 import { useRouter } from "next/router";
-
 import styles from "../styles/Register.module.css";
 import NavForm from "../components/NavForm";
-import { CiUser } from "react-icons/ci";
-import { MdOutlineMailOutline } from "react-icons/md";
-import { LuEye } from "react-icons/lu";
-import { IoMdEyeOff } from "react-icons/io";
+import Input from "../components/Input"; 
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +22,7 @@ const Register = () => {
   };
 
   const router = useRouter();
+
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/");
@@ -49,60 +47,37 @@ const Register = () => {
                 <h1 className={styles.h1}>Register</h1>
               </div>
               <div className={styles.inputs}>
-                <div className={styles.container_input}>
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    className={styles.input}
-                    {...register("NameUser",{required:true})}
-                  />
-                  <CiUser className={styles.icon} />
-                </div>
-                <div className={styles.container_input}>
-                  <input
-                    type="text"
-                    placeholder="Last Name"
-                    className={styles.input}
-                    {...register("LastName",{required:true})}
-                  />
-                  <CiUser className={styles.icon} />
-                </div>
-                <div className={styles.container_input}>
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    className={styles.input}
-                    {...register("Email",{required:true})}
-                  />
-                  <MdOutlineMailOutline className={styles.icon} />
-                </div>
-                <div className={styles.container_input}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    className={styles.input}
-                    {...register("PasswordKey",{required:true})}
-                  />
-                  {showPassword ? (
-                    <LuEye
-                      className={styles.icon}
-                      onClick={handlePasswordVisibility}
-                    />
-                  ) : (
-                    <IoMdEyeOff
-                      className={styles.icon}
-                      onClick={handlePasswordVisibility}
-                    />
-                  )}
-                </div>
-                <div className={styles.container_input}>
-                  <input
-                    type="date"
-                    placeholder="Date birth"
-                    className={styles.input}
-                    {...register("DateBirth",{required:true})}
-                  />
-                </div>
+                <Input
+                  type="text"
+                  placeholder="Full Name"
+                  register={register("NameUser",{required:true})}
+                  icon="user"
+                />
+                <Input
+                  type="text"
+                  placeholder="Last Name"
+                  register={register("LastName",{required:true})}
+                  icon="user"
+                />
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  register={register("Email",{required:true})}
+                  icon="email"
+                />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  register={register("PasswordKey",{required:true})}
+                  showPassword={showPassword}
+                  handlePasswordVisibility={handlePasswordVisibility}
+                  icon={'password'}
+                />
+                <Input
+                  type="date"
+                  placeholder="Date birth"
+                  register={register("DateBirth",{required:true})}
+                />
               </div>
               <button className={styles.button}>Sent</button>
             </form>

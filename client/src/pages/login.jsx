@@ -1,4 +1,3 @@
-// En tu archivo Login.js
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/authContext";
@@ -6,12 +5,9 @@ import { useRouter } from "next/router";
 import styles from "../styles/Login.module.css";
 import visionWeb from "../../public/VISIONWEBLOGO.png";
 import Image from "next/image";
-import { MdOutlineMailOutline } from "react-icons/md";
-import { LuEye } from "react-icons/lu";
-import { IoMdEyeOff } from "react-icons/io";
-
-// Importa NavForm sin llaves
 import NavForm from "../components/NavForm";
+import Link from "next/link";
+import Input from "../components/Input"; 
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -60,36 +56,22 @@ const Login = () => {
                 <h1 className={styles.login_h1}>gin</h1>
               </div>
               <div className={styles.inputs}>
-                <div className={styles.container_input}>
-                  <input
-                    type="email"
-                    className={styles.input}
-                    placeholder="Email"
-                    {...register("Email", { required: true })}
-                  />
-                  <MdOutlineMailOutline className={styles.icon} />
-                </div>
-                <div className={styles.container_input}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className={styles.input}
-                    placeholder="Password"
-                    {...register("PasswordKey", { required: true })}
-                  />
-                  {showPassword ? (
-                    <LuEye
-                      className={styles.icon}
-                      onClick={handlePasswordVisibility}
-                    />
-                  ) : (
-                    <IoMdEyeOff
-                      className={styles.icon}
-                      onClick={handlePasswordVisibility}
-                    />
-                  )}
-                </div>
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  register={register("Email", { required: true })}
+                  icon="email"
+                />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  register={register("PasswordKey", { required: true })}
+                  showPassword={showPassword}
+                  handlePasswordVisibility={handlePasswordVisibility}
+                  icon={'password'}
+                />
               </div>
-              <p className={styles.p}>Forgot your password?</p>
+              <Link href={'/recoveryPassword'} className={styles.p}>Forgot your password?</Link>
               <button className={styles.button}>Sent</button>
             </form>
           </div>

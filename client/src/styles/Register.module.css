@@ -31,29 +31,10 @@
 }
 
 .inputs {
-  display: flex;
-  flex-direction: column;
   width: 100%;
 }
 
-.container_input {
-  border: 2px solid #1265c357;
-  display: flex;
-  align-items: center;
-  border-radius: 15px;
-  color: #74acf0;
-  margin-top: 30px;
-  width: 100%;
-}
 
-.input {
-  border: none;
-  outline: none;
-  flex-grow: 1;
-  color: rgb(49, 49, 49);
-  margin: 0px 10px;
-  height: 45px;
-}
 
 .button {
   border: none;
@@ -72,14 +53,7 @@
   margin-right: 10px;
 }
 
-.input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(68%) sepia(93%) saturate(6476%) hue-rotate(183deg)
-    brightness(95%) contrast(88%);
-}
 
-.input[type="date"] {
-  color: rgb(119, 119, 119); /* Color deseado para el texto de la fecha */
-}
 
 @media screen and (max-width: 400px) {
     .page_register {

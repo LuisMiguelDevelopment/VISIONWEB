@@ -1,6 +1,10 @@
-'use client'
 import { createContext, useContext, useState, useEffect } from "react";
-import { loginRequest , registerRequest } from "../pages/api/users";
+import {
+  loginRequest,
+  recoveryPasswordRequest,
+  registerRequest,
+  updatePasswordRequest,
+} from "../pages/api/users";
 import Cookies from "js-cookie";
 
 export const AuthContext = createContext();
@@ -15,6 +19,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [request, setRequest] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errors, setErrors] = useState([]);
 
@@ -46,6 +51,23 @@ export const AuthProvider = ({ children }) => {
       setErrors([error.response.data.message]);
     }
   };
+  const recovery = async (request) => {
+    try {
+      const res = await recoveryPasswordRequest(request);
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const updatePassword = async (token, newPassword) => {
+    try {
+      await updatePasswordRequest({token, newPassword})
+      console.log(token , newPassword)
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     async function checkLogin() {
@@ -53,18 +75,15 @@ export const AuthProvider = ({ children }) => {
       if (!cookies.token) {
         setIsAuthenticated(false);
         setUser(null);
-        
       } else {
         try {
           const res = await loginRequest(); // Aquí deberías pasar cualquier dato necesario para obtener los datos del usuario
           setIsAuthenticated(true);
           setUser(res.data);
-        
         } catch (error) {
           console.log(error);
           setIsAuthenticated(false);
           setUser(null);
-        
         }
       }
     }
@@ -76,6 +95,9 @@ export const AuthProvider = ({ children }) => {
       value={{
         signin,
         login,
+        recovery,
+        request,
+        updatePassword,
         user,
         isAuthenticated,
         errors,
@@ -83,5 +105,5 @@ export const AuthProvider = ({ children }) => {
     >
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};

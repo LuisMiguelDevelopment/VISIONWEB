@@ -41,6 +41,6 @@ app.use('/api' , friendRoutes);
 connectionDB();
 handleCall(io);
 
-app.listen(PORT, ()=>{
+server.listen(PORT, ()=>{
     console.log("Server in running in PORT: " + PORT);
 })
