@@ -38,7 +38,6 @@ const ListFriends = () => {
         socket.on("reconnect_attempt", () => {
           socket.emit("userLoggedIn");
           console.log("Intento de reconexión");
-
         });
 
         socket.on("connectedUsers", (users) => {
@@ -69,11 +68,11 @@ const ListFriends = () => {
     autoConnect();
   }, [user]);
 
-  const isFriendOnline = (friend, friendUserId) => {
-    console.log("Online users:", onlineUsers);
-    console.log("Friend user id:", friend.UserId);
-    return onlineUsers.includes(String(friendUserId));
-  };
+ const isFriendOnline = (friend, friendUserId) => {
+  console.log("Online users:", onlineUsers);
+  console.log("Friend user id:", friend.UserId);
+  return onlineUsers.includes(String(friendUserId));
+};
 
   return (
     <>
