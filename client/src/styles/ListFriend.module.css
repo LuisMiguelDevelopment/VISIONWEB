@@ -33,6 +33,13 @@
     font-size: 25px;
 }
 
+.indicator {
+    height: 7px;
+    width: 7px;
+    border-radius: 50px;
+    margin-left: 10px;
+  }
+
 .online{
     background-color: #1CD793;
     height: 7px;

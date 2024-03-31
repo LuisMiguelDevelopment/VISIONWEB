@@ -67,21 +67,25 @@ export const CheckEmailExistRegister = async (req, res, next) => {
     }
 }
 
-  export const requiredUser = (req, res, next) => {
-    const token = req.cookies.token;
+  
+export const requiredUser = (req, res, next) => {
+  const token = req.cookies.token;
 
-    if (!token) {
-        return res.status(401).json({ message: "No token, Authorization denied" });
-    }
+  if (!token) {
+      return res.status(401).json({ message: "No token, Authorization denied" });
+  }
 
-    try {
-        const decoded = jwt.verify(token, TOKEN_SECRET);
-        console.log(decoded)
-        req.user = decoded; // Asegúrate de que el ID de usuario está presente en el token
-        next();
-    } catch (error) {
-        return res.status(403).json({ message: 'Invalid token' });
-    }
+  try {
+      const decoded = jwt.verify(token, TOKEN_SECRET);
+      console.log(decoded)
+      req.user = decoded; // Asegúrate de que el ID de usuario está presente en el token
+      
+      // Actualizar la sesión del usuario en la base de datos
+
+      next();
+  } catch (error) {
+      return res.status(403).json({ message: 'Invalid token' });
+  }
 };
 
 // Middleware para comparar la contraseña del usuario con la almacenada en la base de datos
@@ -137,6 +141,8 @@ export const verifyToken = async (req, res, next) => {
     // Adjuntar el UserId al objeto req.user
     req.user = { Email, UserId };
 
+
     next(); // Pasamos al siguiente middleware o controlador
   });
 };
+

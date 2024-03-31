@@ -3,47 +3,102 @@ import styles from "../styles/ListFriend.module.css";
 import Image from "next/image";
 import pruebaimg from "../../public/Rectangle13.png";
 import { PiVideoCameraFill } from "react-icons/pi";
-import io from 'socket.io-client';
-import { useFriend } from "../context/friendContext"; // Importa el hook useFriend
+import io from "socket.io-client";
+import { useFriend } from "../context/friendContext";
+import { useAuth } from "../context/authContext";
+import Cookies from "js-cookie";
 
 const ListFriends = () => {
-  const { friendList } = useFriend(); // Obtiene la lista de amigos del contexto
+  const { friendList } = useFriend();
+  const { user } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [userId, setUserId] = useState(null);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const socket = io("http://localhost:PORT"); // Reemplaza PORT por el puerto del servidor
+    if (user && user.UserId) {
+      setUserId(user.UserId);
+    }
+  }, [user]);
 
-    socket.on("connectedUsers", (users) => {
-      setOnlineUsers(users);
-    });
+  useEffect(() => {
+    const tokenValue = Cookies.get("token");
+    if (userId && tokenValue) {
+      setToken(tokenValue);
+    }
+  }, [userId]);
 
-    return () => {
-      socket.disconnect();
+  useEffect(() => {
+    const connectToSocket = async () => {
+      if (userId && token) {
+        const socket = io("http://localhost:3001", {
+          query: { UserId: userId, token: token },
+        });
+
+        socket.on("reconnect_attempt", () => {
+          socket.emit("userLoggedIn");
+          console.log("Intento de reconexión");
+
+        });
+
+        socket.on("connectedUsers", (users) => {
+          setOnlineUsers(users);
+        });
+
+        
+
+        return () => {
+          socket.disconnect();
+          console.log("Desconectado del servidor");
+        };
+      }
     };
-  }, []);
 
-  const isUserOnline = (userId) => {
-    return onlineUsers.includes(userId);
+    connectToSocket();
+  }, [userId, token]);
+
+  useEffect(() => {
+    const autoConnect = async () => {
+      const tokenValue = Cookies.get("token");
+      if (tokenValue && user) {
+        setToken(tokenValue);
+        setUserId(user.UserId);
+      }
+    };
+
+    autoConnect();
+  }, [user]);
+
+  const isFriendOnline = (friend, friendUserId) => {
+    console.log("Online users:", onlineUsers);
+    console.log("Friend user id:", friend.UserId);
+    return onlineUsers.includes(String(friendUserId));
   };
 
   return (
     <>
-      {friendList.map((friend, index) => (
-        <div key={index} className={styles.container_friend}>
-          <div className={styles.info_friend}>
-            <Image className={styles.image_profile} src={pruebaimg} />
-            <span className={styles.span}>{friend.NameUser}</span>
+      {friendList.map((friend, index) => {
+        console.log("Friend object:", friend);
+        return (
+          <div key={index} className={styles.container_friend}>
+            <div className={styles.info_friend}>
+              <Image className={styles.image_profile} src={pruebaimg} />
+              <span className={styles.span}>{friend.NameUser}</span>
+            </div>
+            <div className={styles.options}>
+              <PiVideoCameraFill className={styles.camera} />
+              {/* Pass friend.UserId as an argument to isFriendOnline */}
+              <div
+                className={`${styles.indicator} ${
+                  isFriendOnline(friend, friend.UserId)
+                    ? styles.online
+                    : styles.offline
+                }`}
+              ></div>
+            </div>
           </div>
-          <div className={styles.options}>
-            <PiVideoCameraFill className={styles.camera} />
-            <div
-              className={`${styles.online} ${
-                isUserOnline(friend.UserId) ? styles.online : styles.offline
-              }`}
-            ></div>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </>
   );
 };
