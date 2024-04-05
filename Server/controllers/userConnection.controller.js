@@ -1,9 +1,12 @@
 import { poolBody } from "../config/db.js";
-import { verifyToken } from "../middlewares/user.Middleware.js";
 
-export const handleCall = (io) => {
+export const connectedUsers = {};
+
+export const userSocketMap = new Map();
+
+export const userConnection = (io) => {
   // Objeto para almacenar los usuarios conectados
-  const connectedUsers = {};
+
 
   // Función para obtener los usuarios conectados desde la base de datos
   async function fetchConnectedUsers() {
@@ -29,13 +32,17 @@ export const handleCall = (io) => {
     const UserId = socket.request._query.UserId;
     console.log("UserId:", UserId);
 
+    userSocketMap.set(UserId, socket);
+
     try {
       // Conexión a la base de datos para insertar/actualizar el usuario conectado
       const connection = await poolBody.connect();
       const request = connection.request();
       request.input("UserId", UserId);
       // Query SQL para insertar/actualizar el usuario conectado en la tabla ConnectedUsers
-      await request.query("MERGE INTO ConnectedUsers USING (VALUES (@UserId)) AS source (UserId) ON ConnectedUsers.UserId = source.UserId WHEN NOT MATCHED THEN INSERT (UserId) VALUES (source.UserId);");
+      await request.query(
+        "MERGE INTO ConnectedUsers USING (VALUES (@UserId)) AS source (UserId) ON ConnectedUsers.UserId = source.UserId WHEN NOT MATCHED THEN INSERT (UserId) VALUES (source.UserId);"
+      );
       await connection.close();
 
       // Agrega al usuario conectado al objeto connectedUsers
@@ -43,7 +50,10 @@ export const handleCall = (io) => {
       // Emite la lista de usuarios conectados a todos los clientes
       emitConnectedUsers();
     } catch (error) {
-      console.error("Error inserting/updating connected user into database: ", error);
+      console.error(
+        "Error inserting/updating connected user into database: ",
+        error
+      );
     }
 
     // Manejo de evento cuando un cliente se desconecta
@@ -55,11 +65,15 @@ export const handleCall = (io) => {
         const request = connection.request();
         request.input("UserId", UserId);
         // Query SQL para eliminar al usuario desconectado de la tabla ConnectedUsers
-        await request.query("DELETE FROM ConnectedUsers WHERE UserId = @UserId");
+        await request.query(
+          "DELETE FROM ConnectedUsers WHERE UserId = @UserId"
+        );
         await connection.close();
 
         // Elimina al usuario desconectado del objeto connectedUsers
         delete connectedUsers[UserId];
+
+        userSocketMap.delete(UserId);
         // Emite la lista de usuarios conectados a todos los clientes
         emitConnectedUsers();
       } catch (error) {
@@ -76,22 +90,27 @@ export const handleCall = (io) => {
         const request = connection.request();
         request.input("UserId", UserId);
         // Query SQL para insertar al usuario que ha iniciado sesión nuevamente en la tabla ConnectedUsers
-        await request.query("MERGE INTO ConnectedUsers USING (VALUES (@UserId)) AS source (UserId) ON ConnectedUsers.UserId = source.UserId WHEN NOT MATCHED THEN INSERT (UserId) VALUES (source.UserId);");
+        await request.query(
+          "MERGE INTO ConnectedUsers USING (VALUES (@UserId)) AS source (UserId) ON ConnectedUsers.UserId = source.UserId WHEN NOT MATCHED THEN INSERT (UserId) VALUES (source.UserId);"
+        );
         await connection.close();
         console.log("Sesión guardada en la base de datos");
+
+        userSocketMap.set(UserId, socket);
+
+        // Llama a fetchConnectedUsers después de que un usuario vuelva a iniciar sesión
+        fetchConnectedUsers();
       } catch (error) {
         console.error("Error saving user session to database: ", error);
       }
     });
+
   });
 
-  // Manejo de evento cuando un cliente se reconecta al servidor de sockets
-  
   // Función para emitir la lista de usuarios conectados a todos los clientes
   async function emitConnectedUsers() {
-    console.log("Connected users:", Object.keys(connectedUsers));
-    io.emit("connectedUsers", Object.keys(connectedUsers));
+    const connectedUserIds = Array.from(userSocketMap.keys());
+    console.log("Connected users:", Object.keys(connectedUserIds));
+    io.emit("connectedUsers", Object.keys(connectedUserIds));
   }
-
-  // Otras funciones y lógica de tu aplicación, como checkFriendship y createCallHistory
 };

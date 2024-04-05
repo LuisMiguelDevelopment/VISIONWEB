@@ -1,18 +1,22 @@
-import { useAuth } from "@/context/authContext";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
+
 import Slider from "@/components/Slider";
+import VideoCall from "@/components/VideoCall";
 
-export default function Home() {
-  const { isAuthenticated } = useAuth();
 
-  const router = useRouter();
-
+const Home = () => {
+  
   return (
-    <>
-      <Slider>
-        <h1>ghola</h1>
-      </Slider>
-    </>
+    <Slider>
+      <h1>¡Hola!</h1>
+      <VideoCall />
+     
+        <div>
+          <p>Llamada entrante de </p>
+          <button >Aceptar llamada</button>
+        </div>
+
+    </Slider>
   );
-}
+};
+
+export default Home;

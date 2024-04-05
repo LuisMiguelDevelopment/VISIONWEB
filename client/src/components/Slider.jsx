@@ -1,7 +1,7 @@
 import styles from "../styles/Slider.module.css";
 import Search from "./Search";
 import ListFriends from "./ListFriends";
-const Slider = ({ children }) => {
+const Slider = ({ children , handleCall }) => {
   return (
     <div className={styles.general}>
       <div className={styles.children_container}>{children}</div>
@@ -10,7 +10,7 @@ const Slider = ({ children }) => {
           <Search text={"Search my friends"} />
         </div>
         <div className={styles.list_friends}>
-            <ListFriends  />
+            <ListFriends handleCall={handleCall}  />
         </div>
       </div>
     </div>

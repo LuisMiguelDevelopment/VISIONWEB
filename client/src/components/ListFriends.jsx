@@ -7,6 +7,7 @@ import io from "socket.io-client";
 import { useFriend } from "../context/friendContext";
 import { useAuth } from "../context/authContext";
 import Cookies from "js-cookie";
+import { useCall } from "../context/CallContext";
 
 const ListFriends = () => {
   const { friendList } = useFriend();
@@ -14,49 +15,40 @@ const ListFriends = () => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const { calls, handleCall } = useCall();
+
+ 
+
+   /**********************  USUARIO ONLINE *********************/
 
   useEffect(() => {
-    if (user && user.UserId) {
-      setUserId(user.UserId);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    const tokenValue = Cookies.get("token");
-    if (userId && tokenValue) {
-      setToken(tokenValue);
-    }
-  }, [userId]);
-
-  useEffect(() => {
+  
     const connectToSocket = async () => {
       if (userId && token) {
-        const socket = io("http://localhost:3001", {
+        const newSocket = io("http://localhost:3001", {
           query: { UserId: userId, token: token },
         });
-
-        socket.on("reconnect_attempt", () => {
-          socket.emit("userLoggedIn");
+        setSocket(newSocket); // Asigna el socket al estado
+        newSocket.on("reconnect_attempt", () => {
+          newSocket.emit("userLoggedIn");
           console.log("Intento de reconexión");
         });
-
-        socket.on("connectedUsers", (users) => {
+        newSocket.on("connectedUsers", (users) => {
           setOnlineUsers(users);
         });
-
-        
-
         return () => {
-          socket.disconnect();
+          newSocket.disconnect();
           console.log("Desconectado del servidor");
         };
       }
     };
 
     connectToSocket();
-  }, [userId, token]);
+  }, [userId, token, user]);
 
   useEffect(() => {
+    // Realizar la conexión automática al socket cuando el token está disponible
     const autoConnect = async () => {
       const tokenValue = Cookies.get("token");
       if (tokenValue && user) {
@@ -64,20 +56,44 @@ const ListFriends = () => {
         setUserId(user.UserId);
       }
     };
-
     autoConnect();
   }, [user]);
 
- const isFriendOnline = (friend, friendUserId) => {
-  console.log("Online users:", onlineUsers);
-  console.log("Friend user id:", friend.UserId);
-  return onlineUsers.includes(String(friendUserId));
-};
+  // Función para verificar si un amigo está en línea
+  const isFriendOnline = (friendUserId) => {
+    return onlineUsers.includes(String(friendUserId));
+  };
+
+
+    /**********************  USUARIO ONLINE *********************/
+
+
+
+   /**********************  CLICK PARA LLAMAR A UN AMIGO *********************/
+  const handleCallClick = (friendUserId) => {
+    console.log(socket)
+    console.log("Botón de llamada clickeado");
+
+    console.log(friendUserId)
+    console.log(userId)
+
+
+    if (socket) {
+      handleCall({
+        userToCall: friendUserId,
+        from: userId 
+      });
+    } else {
+      console.error("Socket is not available");
+    }
+  };
+
+/**********************  CLICK PARA LLAMAR A UN AMIGO *********************/
+
 
   return (
     <>
       {friendList.map((friend, index) => {
-        console.log("Friend object:", friend);
         return (
           <div key={index} className={styles.container_friend}>
             <div className={styles.info_friend}>
@@ -85,13 +101,16 @@ const ListFriends = () => {
               <span className={styles.span}>{friend.NameUser}</span>
             </div>
             <div className={styles.options}>
-              <PiVideoCameraFill className={styles.camera} />
-              {/* Pass friend.UserId as an argument to isFriendOnline */}
+              <PiVideoCameraFill
+                className={styles.camera}
+                onClick={() =>
+                  handleCallClick(friend.UserId, friend.NameUser, friend.signal)
+                }
+              />
+
               <div
                 className={`${styles.indicator} ${
-                  isFriendOnline(friend, friend.UserId)
-                    ? styles.online
-                    : styles.offline
+                  isFriendOnline(friend.UserId) ? styles.online : styles.offline
                 }`}
               ></div>
             </div>
