@@ -20,7 +20,6 @@ app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
-    
   })
 );
 app.use(express.json());
@@ -31,7 +30,6 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: "http://localhost:3000",
   methods: ["GET", "POST"],
-  
 });
 
 /* Mapeo de sockets a usuarios */
@@ -47,57 +45,47 @@ connectionDB();
 
 userConnection(io);
 
-
-
-
 io.on("connection", (socket) => {
-  
+  socket.on("setUserId", (userId) => {
+    userSockets.set(userId, socket.id);
+    console.log("Contenido de userSockets:", userSockets);
+  });
 
-    socket.on("setUserId", (userId) => {
-        userSockets.set(userId, socket.id);
-        console.log("Contenido de userSockets:", userSockets);
-      });
-    
-      socket.on("disconnect", () => {
-        console.log('User disconnected:', socket.id);
-        // Eliminar el socket del mapa de usuarios cuando se desconecta
-        for (const [key, value] of userSockets.entries()) {
-          if (value === socket.id) {
-            userSockets.delete(key);
-            break;
-          }
-        }
-      });
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+    // Eliminar el socket del mapa de usuarios cuando se desconecta
+    for (const [key, value] of userSockets.entries()) {
+      if (value === socket.id) {
+        userSockets.delete(key);
+        break;
+      }
+    }
+  });
   /******** LLAMAR AMIGO **********/
   socket.on("callUser", (data) => {
-    console.log("Evento callUser recibido:", data); // Agregar este registro de consola
-    const { userToCall, signal, from , stream } = data;
+    console.log("Evento callUser recibido:", data);
+    const { userToCall, signal, from } = data;
     const receiverSocketId = userSockets.get(userToCall);
 
-    console.log(stream)
-  
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("callUser", { signal, from , userToCall  } , stream);
+      io.to(receiverSocketId).emit("callUser", {
+        signal,
+        from,
+        userToCall
+      });
     } else {
-      console.error('User socket not found for user:', userToCall);
+      console.error("User socket not found for user:", userToCall);
     }
   });
 
-  /********* RESPUESTA LLAMADA***********/
+  
   socket.on("answerCall", (data) => {
-    const {from , signal , userToCall , stream  } = data;
-     const receiverSocketId = userSockets.get(from);
-    console.log("mi perro:  ",receiverSocketId)
-    io.to(receiverSocketId).emit("callAccepted", {userToCall , signal , from , stream });
+    console.log("Respuesta a la llamada recibida:", data);
+    const { from, signal, userToCall } = data;
+    const receiverSocketId = userSockets.get(from);
+    io.to(receiverSocketId).emit("callAccepted", { userToCall, signal, from });
   });
-
-
-  socket.on("stream", (data) => {
-   console.log("soy stream",data)
-  });
-
-
-
+  
   socket.on("endCall", (data) => {
     const { from, to } = data;
     const receiverSocketId = userSockets.get(to);

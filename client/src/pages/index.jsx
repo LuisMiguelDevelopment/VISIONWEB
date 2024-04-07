@@ -6,20 +6,45 @@ import { socket } from "@/context/CallContext";
 import Slider from "@/components/Slider";
 
 const Home = () => {
-  const { callReceived, tocall, caller, callerSignal, myPeer, setMyPeer, stream, userVideoRef } = useCall();
+  const {
+    callReceived,
+    tocall,
+    caller,
+    callerSignal,
+    myPeer,
+    setMyPeer,
+    stream,
+    userVideoRef,
+  } = useCall();
   const { user } = useAuth();
   const callerVideoRef = useRef(null);
   const peerRef = useRef(null);
+  const [datastream, setStream] = useState();
+
+  useEffect(() => {
+    // Obtener acceso al flujo de vídeo del usuario
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        setStream(stream);
+
+        userVideoRef.current.srcObject = stream;
+        console.log("Tipo de stream:", typeof stream);
+      })
+      .catch((error) => {
+        console.error("Error accessing user media:", error);
+      });
+  }, []);
 
   const handleCallAccept = () => {
-    const peer = new Peer({ initiator: false, trickle: false });
+    const peer = new Peer({ initiator: false, trickle: false , stream: stream });
 
     peer.on("signal", (data) => {
+     
       socket.emit("answerCall", {
         to: tocall,
         from: caller,
-        signal: data,
-        stream: stream
+        signal: data
       });
     });
 
@@ -33,14 +58,12 @@ const Home = () => {
 
     socket.on("callAccepted", (data) => {
       console.log(data);
-      const { signal, stream } = data;
+      const { signal } = data;
       myPeer.signal(signal);
 
       myPeer.on("connect", () => {
         console.log("¡Conexión establecida!");
       });
-
-      console.log(stream);
 
       if (callerVideoRef.current && stream) {
         callerVideoRef.current.srcObject = stream;

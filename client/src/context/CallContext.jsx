@@ -29,6 +29,7 @@ export const CallProvider = ({ children }) => {
   const userVideoRef = useRef(null);
   const [callerStream, setCallerStream] = useState(null);
   const [stream, setStream] = useState();
+  const callerVideoRef = useRef(null);
 
   const { user } = useAuth();
 
@@ -60,32 +61,26 @@ export const CallProvider = ({ children }) => {
   }, []);
 
   const handleCall = (callData) => {
-    const peer = new Peer({ initiator: true, trickle: false });
+    const peer = new Peer({ initiator: true, trickle: false , stream: stream });
 
     setMyPeer(peer);
 
     peer.on("signal", (signal) => {
       console.log(signal);
 
-      // const streamData = {
-      //   MediaStream:{
-      //     id: stream.id,
-      //     active: stream.active,
-      //     onactive: stream.onactive,
-      //     onaddtrack: stream.onaddtrack,
-      //     oninactive: stream.oninactive,
-      //     onremovetrack: stream.onremovetrack
-      //   }
-       
-      // };
-
-      console.log(stream);
       if (stream) {
+        console.log(stream);
+
         socket.emit("callUser", {
           ...callData,
-          signal: signal,
-          stream: stream,
+          signal: signal
         });
+
+
+        if (callerVideoRef.current && stream) {
+          callerVideoRef.current.srcObject = stream;
+        }
+
       } else {
         console.error("Stream is not available yet.");
         // Handle the case when the stream is not available yet
@@ -98,7 +93,6 @@ export const CallProvider = ({ children }) => {
       setMe(id);
     });
   }, []);
-
 
   useEffect(() => {
     if (user) {
@@ -116,7 +110,6 @@ export const CallProvider = ({ children }) => {
         setTocall(data.userToCall);
         setCallerSignal(data.signal);
         setCallerStream(data.stream);
-        console.log(data.stream);
       }
     });
 
