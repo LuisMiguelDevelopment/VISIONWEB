@@ -19,38 +19,27 @@ const Home = () => {
   const { user } = useAuth();
   const callerVideoRef = useRef(null);
   const peerRef = useRef(null);
-  const [datastream, setStream] = useState();
-
-  useEffect(() => {
-    // Obtener acceso al flujo de vídeo del usuario
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        setStream(stream);
-
-        userVideoRef.current.srcObject = stream;
-        console.log("Tipo de stream:", typeof stream);
-      })
-      .catch((error) => {
-        console.error("Error accessing user media:", error);
-      });
-  }, []);
 
   const handleCallAccept = () => {
-    const peer = new Peer({ initiator: false, trickle: false , stream: stream });
+    const peer = new Peer({ initiator: false, trickle: false, stream: stream });
 
     peer.on("signal", (data) => {
-     
       socket.emit("answerCall", {
         to: tocall,
         from: caller,
-        signal: data
+        signal: data,
       });
     });
 
     peer.signal(callerSignal);
     setMyPeer(peer);
     peerRef.current = peer;
+
+    peer.on("stream", (stream) => {
+      callerVideoRef.current.srcObject = stream; 
+    });
+
+    userVideoRef.current.srcObject = stream;
   };
 
   useEffect(() => {
@@ -65,9 +54,10 @@ const Home = () => {
         console.log("¡Conexión establecida!");
       });
 
-      if (callerVideoRef.current && stream) {
-        callerVideoRef.current.srcObject = stream;
-      }
+      myPeer.on("stream", (stream) => {
+        callerVideoRef.current.srcObject = stream; // Mostrar el stream del llamante
+      });
+      userVideoRef.current.srcObject = stream;
     });
 
     return () => {
@@ -89,14 +79,16 @@ const Home = () => {
           ref={userVideoRef}
           autoPlay
           playsInline
-          style={{ width: "50%" }}
+          style={{ width: "500px" }}
+          height={{height: "500px"}}
         />
 
         <video
           ref={callerVideoRef}
           autoPlay
           playsInline
-          style={{ width: "50%" }}
+          style={{ width: "500px" }}
+          height={{height: "500px"}}
         />
       </div>
     </Slider>

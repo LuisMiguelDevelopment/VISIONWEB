@@ -29,7 +29,6 @@ export const CallProvider = ({ children }) => {
   const userVideoRef = useRef(null);
   const [callerStream, setCallerStream] = useState(null);
   const [stream, setStream] = useState();
-  const callerVideoRef = useRef(null);
 
   const { user } = useAuth();
 
@@ -74,16 +73,13 @@ export const CallProvider = ({ children }) => {
         socket.emit("callUser", {
           ...callData,
           signal: signal
-        });
+        });  
+        
 
-
-        if (callerVideoRef.current && stream) {
-          callerVideoRef.current.srcObject = stream;
-        }
-
+        
       } else {
         console.error("Stream is not available yet.");
-        // Handle the case when the stream is not available yet
+      
       }
     });
   };
@@ -111,6 +107,7 @@ export const CallProvider = ({ children }) => {
         setCallerSignal(data.signal);
         setCallerStream(data.stream);
       }
+
     });
 
     return () => {
