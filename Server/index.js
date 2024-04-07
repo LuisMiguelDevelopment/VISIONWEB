@@ -20,6 +20,7 @@ app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
+    
   })
 );
 app.use(express.json());
@@ -30,6 +31,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: "http://localhost:3000",
   methods: ["GET", "POST"],
+  
 });
 
 /* Mapeo de sockets a usuarios */
@@ -58,19 +60,24 @@ io.on("connection", (socket) => {
     
       socket.on("disconnect", () => {
         console.log('User disconnected:', socket.id);
-        userSockets.delete(socket.id);
+        // Eliminar el socket del mapa de usuarios cuando se desconecta
+        for (const [key, value] of userSockets.entries()) {
+          if (value === socket.id) {
+            userSockets.delete(key);
+            break;
+          }
+        }
       });
-
   /******** LLAMAR AMIGO **********/
   socket.on("callUser", (data) => {
     console.log("Evento callUser recibido:", data); // Agregar este registro de consola
-    const { userToCall, signal, from } = data;
-    
+    const { userToCall, signal, from , stream } = data;
     const receiverSocketId = userSockets.get(userToCall);
-    console.log(receiverSocketId)
+
+    console.log(stream)
+  
     if (receiverSocketId) {
-      // Enviar la llamada al socket del amigo correspondiente
-      io.to(receiverSocketId).emit("callUser", { signal, from });
+      io.to(receiverSocketId).emit("callUser", { signal, from , userToCall  } , stream);
     } else {
       console.error('User socket not found for user:', userToCall);
     }
@@ -78,7 +85,25 @@ io.on("connection", (socket) => {
 
   /********* RESPUESTA LLAMADA***********/
   socket.on("answerCall", (data) => {
-    io.to(data.to).emit("callAccepted", data.signal);
+    const {from , signal , userToCall , stream  } = data;
+     const receiverSocketId = userSockets.get(from);
+    console.log("mi perro:  ",receiverSocketId)
+    io.to(receiverSocketId).emit("callAccepted", {userToCall , signal , from , stream });
+  });
+
+
+  socket.on("stream", (data) => {
+   console.log("soy stream",data)
+  });
+
+
+
+  socket.on("endCall", (data) => {
+    const { from, to } = data;
+    const receiverSocketId = userSockets.get(to);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("callEnded", { from });
+    }
   });
 
   /**** RESPUESTA LLAMADA**********/

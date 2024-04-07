@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Peer from "simple-peer";
 
-const VideoCall = ({ callUser, answerCall }) => {
+const VideoCall = ({ callReceived, tocall, caller, callerSignal }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const localVideoRef = useRef();
@@ -20,6 +20,26 @@ const VideoCall = ({ callUser, answerCall }) => {
     };
     initializeMediaStream();
   }, []);
+
+  useEffect(() => {
+    const handleCall = async () => {
+      if (callReceived && localVideoRef.current) {
+        console.log("Configurando conexión Peer...");
+        const peer = new Peer({ initiator: true });
+        setMyPeer(peer);
+        const stream = localVideoRef.current.srcObject;
+        if (stream) {
+          stream.getTracks().forEach((track) => peer.addTrack(track, stream));
+          console.log("Señal recibida:", callerSignal);
+          peer.signal(callerSignal);
+          peer.on("stream", (stream) => {
+            setRemoteStream(stream);
+          });
+        }
+      }
+    };
+    handleCall();
+  }, [callReceived, callerSignal]);
 
   const toggleAudio = () => {
     const stream = localVideoRef.current.srcObject;
@@ -42,39 +62,6 @@ const VideoCall = ({ callUser, answerCall }) => {
     }
   };
 
-  const handleCall = async () => {
-    const peer = new Peer({ initiator: true });
-    setMyPeer(peer);
-    const stream = localVideoRef.current.srcObject;
-    peer.addStream(stream);
-    peer.on("signal", (signal) => {
-      callUser(signal);
-    });
-    peer.on("stream", (stream) => {
-      setRemoteStream(stream);
-    });
-  };
-
-  const handleAnswer = async (signal) => {
-    const peer = new Peer({ initiator: false });
-    setMyPeer(peer);
-    const stream = localVideoRef.current.srcObject;
-    peer.addStream(stream);
-    peer.signal(signal);
-    peer.on("stream", (stream) => {
-      setRemoteStream(stream);
-    });
-  };
-
-  useEffect(() => {
-    if (answerCall && answerCall.signal) {
-      handleAnswer(answerCall.signal);
-    }
-  }, [answerCall]);
-
-
-
-
   return (
     <div>
       <video ref={localVideoRef} autoPlay muted width={400} height={400} />
@@ -84,7 +71,6 @@ const VideoCall = ({ callUser, answerCall }) => {
       <div>
         <button onClick={toggleAudio}>{isMuted ? "Unmute" : "Mute"}</button>
         <button onClick={toggleVideo}>{isCameraOff ? "Turn Camera on" : "Turn Camera off"}</button>
-        {!answerCall && <button onClick={handleCall}>Call</button>}
       </div>
     </div>
   );

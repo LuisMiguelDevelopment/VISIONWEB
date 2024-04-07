@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useAuth } from "./authContext";
-
+import { CiParking1 } from "react-icons/ci";
 
 const ENDPOINT = "http://localhost:3001";
-const socket = io(ENDPOINT);
+export const socket = io(ENDPOINT);
 
 const CallContext = React.createContext();
 
@@ -20,14 +20,32 @@ export const useCall = () => {
 export const CallProvider = ({ children }) => {
   const [calls, setCalls] = useState([]);
   const [peers, setPeers] = useState({});
-  const [caller , setCaller] = useState("");
-  const [tocall , setTocall] = useState("");
+  const [caller, setCaller] = useState("");
+  const [tocall, setTocall] = useState("");
   const [callerSignal, setCallerSignal] = useState();
-  const [me , setMe] = useState("");
+  const [me, setMe] = useState("");
   const [callReceived, setCallReceived] = useState(false);
+  const [myPeer, setMyPeer] = useState(null);
+  const userVideoRef = useRef(null);
+  const [callerStream, setCallerStream] = useState(null);
+  const [stream, setStream] = useState();
 
   const { user } = useAuth();
 
+  useEffect(() => {
+    // Obtener acceso al flujo de vídeo del usuario
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        setStream(stream);
+
+        userVideoRef.current.srcObject = stream;
+        console.log("Tipo de stream:", typeof stream);
+      })
+      .catch((error) => {
+        console.error("Error accessing user media:", error);
+      });
+  }, []);
 
   useEffect(() => {
     const handleCallUser = (data) => {
@@ -42,55 +60,90 @@ export const CallProvider = ({ children }) => {
   }, []);
 
   const handleCall = (callData) => {
-    const peer = new Peer({ initiator: true });
-  
+    const peer = new Peer({ initiator: true, trickle: false });
+
+    setMyPeer(peer);
+
     peer.on("signal", (signal) => {
-      socket.emit("callUser", {
-        ...callData,
-        signal: signal,
-      });
+      console.log(signal);
+
+      // const streamData = {
+      //   MediaStream:{
+      //     id: stream.id,
+      //     active: stream.active,
+      //     onactive: stream.onactive,
+      //     onaddtrack: stream.onaddtrack,
+      //     oninactive: stream.oninactive,
+      //     onremovetrack: stream.onremovetrack
+      //   }
+       
+      // };
+
+      console.log(stream);
+      if (stream) {
+        socket.emit("callUser", {
+          ...callData,
+          signal: signal,
+          stream: stream,
+        });
+      } else {
+        console.error("Stream is not available yet.");
+        // Handle the case when the stream is not available yet
+      }
     });
-  
-    setPeers((prevPeers) => ({
-      ...prevPeers,
-      [callData.userToCall]: peer,
-    }));
   };
 
-useEffect(() => {
-  socket.on("me", (id) => {
-    console.log(id);
-    setMe(id);
-  });
+  useEffect(() => {
+    socket.on("me", (id) => {
+      setMe(id);
+    });
+  }, []);
 
 
-  
-
-  socket.on("callUser", (data) => {
-    if (!callReceived) {
-      console.log("soy yo", data);
-      setCallReceived(true);
+  useEffect(() => {
+    if (user) {
+      const userId = user.UserId;
+      socket.emit("setUserId", userId);
     }
-    setCaller(data.from);
-    setTocall(data.userToCall);
-    setCallerSignal(data.signal);
-  });
-}, [callReceived]);
+  }, [user]);
 
+  useEffect(() => {
+    socket.on("callUser", (data) => {
+      if (!callReceived) {
+        console.log(data);
+        setCallReceived(true);
+        setCaller(data.from);
+        setTocall(data.userToCall);
+        setCallerSignal(data.signal);
+        setCallerStream(data.stream);
+        console.log(data.stream);
+      }
+    });
 
-
-useEffect(() => {
-  if (user) {
-    const userId = user.UserId;
-    console.log("holi", userId);
-    socket.emit("setUserId", userId);
-  }
-}, [user]);
-
-
+    return () => {
+      socket.off("callUser");
+    };
+  }, [callReceived]);
 
   return (
-    <CallContext.Provider value={{ calls, peers, handleCall, socket }}>
+    // En CallProvider
+    <CallContext.Provider
+      value={{
+        calls,
+        peers,
+        handleCall,
+        socket,
+        callReceived,
+        tocall,
+        caller,
+        callerSignal,
+        myPeer,
+        setMyPeer,
+        callerStream,
+        stream,
+        userVideoRef,
+      }}
+    >
       {children}
     </CallContext.Provider>
   );

@@ -104,7 +104,7 @@ const ListFriends = () => {
               <PiVideoCameraFill
                 className={styles.camera}
                 onClick={() =>
-                  handleCallClick(friend.UserId, friend.NameUser, friend.signal)
+                  handleCallClick(friend.UserId, friend.NameUser)
                 }
               />
 
