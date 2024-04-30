@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useAuth } from "./authContext";
-import { CiParking1 } from "react-icons/ci";
+
 
 const ENDPOINT = "http://localhost:3001";
 export const socket = io(ENDPOINT);
@@ -38,13 +38,26 @@ export const CallProvider = ({ children }) => {
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         setStream(stream);
-
         userVideoRef.current.srcObject = stream;
         console.log("Tipo de stream:", typeof stream);
       })
       .catch((error) => {
         console.error("Error accessing user media:", error);
       });
+  }, []);
+
+  useEffect(() => {
+    const handleReconnection = (user) => {
+      const userReconnect = user.UserId; 
+      console.log("Reconexión del usuario:", userReconnect);
+      socket.emit("setUserId", userReconnect); // Reasignar la ID de usuario al socket
+    };
+
+    socket.on("reconnected", handleReconnection);
+
+    return () => {
+      socket.off("reconnected", handleReconnection);
+    };
   }, []);
 
   useEffect(() => {
@@ -60,7 +73,7 @@ export const CallProvider = ({ children }) => {
   }, []);
 
   const handleCall = (callData) => {
-    const peer = new Peer({ initiator: true, trickle: false , stream: stream });
+    const peer = new Peer({ initiator: true, trickle: false, stream: stream });
 
     setMyPeer(peer);
 
@@ -69,26 +82,15 @@ export const CallProvider = ({ children }) => {
 
       if (stream) {
         console.log(stream);
-
         socket.emit("callUser", {
           ...callData,
-          signal: signal
-        });  
-        
-
-        
+          signal: signal,
+        });
       } else {
         console.error("Stream is not available yet.");
-      
       }
     });
   };
-
-  useEffect(() => {
-    socket.on("me", (id) => {
-      setMe(id);
-    });
-  }, []);
 
   useEffect(() => {
     if (user) {
@@ -107,7 +109,6 @@ export const CallProvider = ({ children }) => {
         setCallerSignal(data.signal);
         setCallerStream(data.stream);
       }
-
     });
 
     return () => {

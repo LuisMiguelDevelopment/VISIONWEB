@@ -1,31 +1,90 @@
-// import { poolBody } from "../config/db.js";
+import { poolBody } from "../config/db.js";
 
-// export const callFriend = async (io, socket, data) => {
-//   try {
-//     // Verificar que data.userToCall y data.signal no sean undefined
-//     if (data.userToCall && data.signal) {
-//       const connection = await poolBody.connect();
-//       const request = connection.request();
+const userSockets = new Map();
 
-//       request.input("from", data.from);
-//       request.input("userToCall", data.userToCall);
+const callRoom = new Map();
 
-//       console.log("Llamando al usuario:", data.userToCall);
-      
-//       // Emitir la llamada a todos los usuarios conectados
-//       io.emit("callUser", {
-//         userToCall: data.userToCall,
-//         signal: data.signal,
-//         from: data.from,
-//         name: data.name,
-//         to : data.to
-//       });
+export const callUser = (io) => {
+  io.on("connection", async (socket) => {
+    socket.on("setUserId", (userId) => {
+      // Registrar el nuevo socket.id para el usuario
+      userSockets.set(userId, socket.id);
+      console.log("Contenido de userSockets:", userSockets);
+    });
 
-//       await connection.close();
-//     } else {
-//       console.error("UserToCall or signal is undefined");
-//     }
-//   } catch (error) {
-//     console.error("Error calling friend", error);
-//   }
-// };
+    socket.on("reconnect", (userId) => {
+      userSockets.set(userId, socket.id);
+      console.log("Usuario reconectado:", userId);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+      // Eliminar el socket del mapa de usuarios cuando se desconecta
+      for (const [key, value] of userSockets.entries()) {
+        if (value === socket.id) {
+          userSockets.delete(key);
+          break;
+        }
+      }
+    });
+
+    socket.on("callUser", async (data) => {
+      console.log("Evento callUser recibido:", data);
+      const { userToCall, signal, from } = data;
+      const receiverSocketId = userSockets.get(userToCall);
+
+      if (!callRoom.has(userToCall)) {
+        callRoom.set(userToCall, new Set());
+      }
+
+      callRoom.get(userToCall).add(from);
+
+      console.log("en videollamada", callRoom)
+
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("callUser", {
+          signal,
+          from,
+          userToCall,
+        });
+      } else {
+        console.error("User socket not found for user:", userToCall);
+      }
+    });
+
+    socket.on("answerCall", async (data) => {
+      console.log("Respuesta a la llamada recibida:", data);
+      const { from, signal, to, callId } = data;
+      const receiverSocketId = userSockets.get(from);
+      const callerSocketId = userSockets.get(to);
+
+      io.to(receiverSocketId).emit("callAccepted", {
+        to,
+        signal,
+        from,
+      });
+
+      const connection = await poolBody.connect();
+      try {
+        const request = connection.request();
+
+        request.input("CallerId", from);
+        request.input("CallerSocketId", callerSocketId);
+        request.input("CalleeId", to);
+        request.input("CalleeSocketId", receiverSocketId); // Usar el socket del destinatario
+        request.input("StartTime", new Date());
+
+        await request.query(
+          "INSERT INTO CallHistory (CallerId, CallerSocketId, CalleeId, CalleeSocketId, StartTime) VALUES (@CallerId, @CallerSocketId, @CalleeId, @CalleeSocketId, @StartTime);"
+        );
+      } catch (error) {
+        console.log(error);
+      } finally {
+        await connection.close();
+      }
+    });
+
+    /**** RESPUESTA LLAMADA**********/
+  });
+
+};

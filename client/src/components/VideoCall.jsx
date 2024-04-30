@@ -1,48 +1,89 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useCall } from "@/context/CallContext";
+import { useAuth } from "@/context/authContext";
+import { socket } from "@/context/CallContext";
 import Peer from "simple-peer";
+import styles from "../styles/VideoCall.module.css";
 
-const VideoCall = ({ callReceived, tocall, caller, callerSignal }) => {
+import { BsCameraVideo } from "react-icons/bs";
+import { BsCameraVideoOff } from "react-icons/bs";
+
+import { PiMicrophoneLight } from "react-icons/pi";
+import { PiMicrophoneSlash } from "react-icons/pi";
+
+import ModalCall from "./modaCall";
+
+const VideoCall = () => {
+  const {
+    callReceived,
+    tocall,
+    caller,
+    callerSignal,
+    myPeer,
+    setMyPeer,
+    stream,
+    userVideoRef,
+  } = useCall();
+
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
-  const localVideoRef = useRef();
-  const remoteVideoRef = useRef();
-  const [myPeer, setMyPeer] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(null);
+  const [showAnswerButton, setShowAnswerButton] = useState(true);
+
+  const { user } = useAuth();
+  const callerVideoRef = useRef(null);
+  const peerRef = useRef(null);
+
+  const handleCallAccept = () => {
+    const peer = new Peer({ initiator: false, trickle: false, stream: stream });
+
+    peer.on("signal", (data) => {
+      socket.emit("answerCall", {
+        to: tocall,
+        from: caller,
+        signal: data,
+      });
+    });
+
+    peer.signal(callerSignal);
+    setMyPeer(peer);
+    peerRef.current = peer;
+
+    peer.on("stream", (stream) => {
+      callerVideoRef.current.srcObject = stream;
+    });
+
+    setShowAnswerButton(false);
+
+    userVideoRef.current.srcObject = stream;
+  };
 
   useEffect(() => {
-    const initializeMediaStream = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localVideoRef.current.srcObject = stream;
-      } catch (error) {
-        console.error("Error accessing media devices", error);
-      }
-    };
-    initializeMediaStream();
-  }, []);
+    if (!myPeer) return;
 
-  useEffect(() => {
-    const handleCall = async () => {
-      if (callReceived && localVideoRef.current) {
-        console.log("Configurando conexión Peer...");
-        const peer = new Peer({ initiator: true });
-        setMyPeer(peer);
-        const stream = localVideoRef.current.srcObject;
-        if (stream) {
-          stream.getTracks().forEach((track) => peer.addTrack(track, stream));
-          console.log("Señal recibida:", callerSignal);
-          peer.signal(callerSignal);
-          peer.on("stream", (stream) => {
-            setRemoteStream(stream);
-          });
-        }
-      }
+    socket.on("callAccepted", (data) => {
+      console.log(data);
+      const { signal } = data;
+      myPeer.signal(signal);
+
+      myPeer.on("connect", () => {
+        console.log("¡Conexión establecida!");
+      });
+
+      myPeer.on("stream", (stream) => {
+        callerVideoRef.current.srcObject = stream; // Mostrar el stream del llamante
+      });
+      userVideoRef.current.srcObject = stream;
+    });
+
+    return () => {
+      socket.off("callAccepted");
     };
-    handleCall();
-  }, [callReceived, callerSignal]);
+  }, [myPeer]);
+
+  /* Configuration audio */
 
   const toggleAudio = () => {
-    const stream = localVideoRef.current.srcObject;
+    const stream = userVideoRef.current.srcObject;
     const audioTracks = stream.getAudioTracks();
     audioTracks.forEach((track) => {
       track.enabled = !track.enabled;
@@ -50,8 +91,10 @@ const VideoCall = ({ callReceived, tocall, caller, callerSignal }) => {
     setIsMuted(!isMuted);
   };
 
+  /* Configuration video */
+
   const toggleVideo = () => {
-    const stream = localVideoRef.current.srcObject;
+    const stream = userVideoRef.current.srcObject;
 
     if (stream) {
       const videoTracks = stream.getVideoTracks();
@@ -63,14 +106,41 @@ const VideoCall = ({ callReceived, tocall, caller, callerSignal }) => {
   };
 
   return (
-    <div>
-      <video ref={localVideoRef} autoPlay muted width={400} height={400} />
-      {remoteStream && (
-        <video ref={remoteVideoRef} autoPlay width={400} height={400} srcObject={remoteStream} />
-      )}
-      <div>
-        <button onClick={toggleAudio}>{isMuted ? "Unmute" : "Mute"}</button>
-        <button onClick={toggleVideo}>{isCameraOff ? "Turn Camera on" : "Turn Camera off"}</button>
+    <div className={styles.general}>
+      <div className={styles.container_videos}>
+        <div className={styles.border_video}>
+          <video className={styles.video} ref={callerVideoRef} autoPlay />
+        </div>
+        <div className={`${styles.border_video} ${styles.border_video2}`}>
+          <video
+            className={styles.video_user}
+            ref={userVideoRef}
+            autoPlay
+            muted
+          />
+        </div>
+      </div>
+      <div className={styles.buttons}>
+        <button className={styles.button_options} onClick={toggleVideo}>
+          {isCameraOff ? (
+            <BsCameraVideoOff className={styles.camera_off} />
+          ) : (
+            <BsCameraVideo className={styles.camera_on} />
+          )}
+        </button>
+        <button className={styles.button_options} onClick={toggleAudio}>
+          {isMuted ? (
+            <PiMicrophoneSlash className={styles.microphone_off} />
+          ) : (
+            <PiMicrophoneLight />
+          )}
+        </button>
+      </div>
+
+      <div className={styles.modal}>
+        {showAnswerButton && callReceived && tocall === user.UserId && (
+          <ModalCall handleCallAccept={handleCallAccept} />
+        )}
       </div>
     </div>
   );
