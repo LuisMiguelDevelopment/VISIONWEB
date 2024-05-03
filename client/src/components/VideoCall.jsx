@@ -13,6 +13,8 @@ import { PiMicrophoneSlash } from "react-icons/pi";
 
 import ModalCall from "./modaCall";
 
+import alarma from "../../public/alarma.mp3";
+
 const VideoCall = () => {
   const {
     callReceived,
@@ -28,6 +30,10 @@ const VideoCall = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [showAnswerButton, setShowAnswerButton] = useState(true);
+
+  const [isRinging, setIsRinging] = useState(false);
+
+  const [callAccepted, setCallAccepted] = useState(false);
 
   const { user } = useAuth();
   const callerVideoRef = useRef(null);
@@ -54,7 +60,10 @@ const VideoCall = () => {
 
     setShowAnswerButton(false);
 
+    setCallAccepted(true)
+
     userVideoRef.current.srcObject = stream;
+
   };
 
   useEffect(() => {
@@ -72,6 +81,9 @@ const VideoCall = () => {
       myPeer.on("stream", (stream) => {
         callerVideoRef.current.srcObject = stream; // Mostrar el stream del llamante
       });
+
+      setCallAccepted(true)
+
       userVideoRef.current.srcObject = stream;
     });
 
@@ -79,6 +91,21 @@ const VideoCall = () => {
       socket.off("callAccepted");
     };
   }, [myPeer]);
+
+  /* sound configuration */
+
+  useEffect(() => {
+    // Reproducir sonido cuando hay una llamada recibida
+    if (callReceived && !isRinging && showAnswerButton) {
+      const audio = new Audio(alarma);
+      audio.play();
+
+      setIsRinging(true);
+    } else if ((!callReceived || !showAnswerButton) && isRinging) {
+      setIsRinging(false);
+
+    }
+  }, [callReceived, isRinging, showAnswerButton]);
 
   /* Configuration audio */
 
@@ -113,7 +140,7 @@ const VideoCall = () => {
         </div>
         <div className={`${styles.border_video} ${styles.border_video2}`}>
           <video
-            className={styles.video_user}
+            className={`${styles.video_user} ${callAccepted ? styles.small : styles.large}`}
             ref={userVideoRef}
             autoPlay
             muted

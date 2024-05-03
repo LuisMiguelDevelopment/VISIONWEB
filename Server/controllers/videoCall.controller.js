@@ -52,9 +52,14 @@ export const callUser = (io) => {
       }
     });
 
+
+
+
+
+
     socket.on("answerCall", async (data) => {
       console.log("Respuesta a la llamada recibida:", data);
-      const { from, signal, to, callId } = data;
+      const { from, signal, to } = data;
       const receiverSocketId = userSockets.get(from);
       const callerSocketId = userSockets.get(to);
 

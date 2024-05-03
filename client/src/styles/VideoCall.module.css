@@ -24,9 +24,18 @@
 }
 
 .video_user {
-  width: 200px;
-  height: 100%;
   border-radius: 15px;
+  transition: all 0.5s ease-in-out; /* Añadir transición para suavizar el cambio de tamaño */
+}
+
+.video_user.large {
+  width: 60vw; /* Tamaño grande */
+  height: auto;
+}
+
+.video_user.small {
+  width: 200px; /* Tamaño pequeño */
+  height: 100%;
 }
 
 .border_video2 {
