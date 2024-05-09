@@ -14,7 +14,7 @@ export const callUser = (io) => {
 
     socket.on("reconnect", (userId) => {
       userSockets.set(userId, socket.id);
-      console.log("Usuario reconectado:", userId);
+      console.log("Usuario reconectado:", userId, "Nuevo socket:", socket.id);
     });
 
     socket.on("disconnect", () => {
@@ -39,7 +39,7 @@ export const callUser = (io) => {
 
       callRoom.get(userToCall).add(from);
 
-      console.log("en videollamada", callRoom)
+      console.log("en videollamada", callRoom);
 
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("callUser", {
@@ -51,11 +51,6 @@ export const callUser = (io) => {
         console.error("User socket not found for user:", userToCall);
       }
     });
-
-
-
-
-
 
     socket.on("answerCall", async (data) => {
       console.log("Respuesta a la llamada recibida:", data);
@@ -90,6 +85,23 @@ export const callUser = (io) => {
     });
 
     /**** RESPUESTA LLAMADA**********/
-  });
 
+    socket.on("hangupCall", async (data) => {
+      console.log("llamada cancelada", data);
+    
+      const { from, to } = data;
+    
+      const receiverSocketId = userSockets.get(from);
+      const callerSocketId = userSockets.get(to);
+
+      io.to(receiverSocketId).emit("callCancelled", {
+        to,
+        from,
+      });
+      io.to(callerSocketId).emit("callCancelled", {
+        to,
+        from,
+      });
+    });
+  });
 };

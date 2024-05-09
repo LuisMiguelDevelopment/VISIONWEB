@@ -13,7 +13,7 @@ import { PiMicrophoneSlash } from "react-icons/pi";
 
 import ModalCall from "./modaCall";
 
-import alarma from "../../public/alarma.mp3";
+import alarmaAudio from "../../public/alarma.mp3";
 
 const VideoCall = () => {
   const {
@@ -25,17 +25,21 @@ const VideoCall = () => {
     setMyPeer,
     stream,
     userVideoRef,
+    setCallReceived,
   } = useCall();
 
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isSharingScreen, setIsSharingScreen] = useState(false);
+
+
   const [showAnswerButton, setShowAnswerButton] = useState(true);
 
-  const [isRinging, setIsRinging] = useState(false);
+  const [playAlarm, setPlayAlarm] = useState(false); // Estado para controlar la alarma
+  const audioRef = useRef(null);
 
   const [callAccepted, setCallAccepted] = useState(false);
 
-  const { user } = useAuth();
   const callerVideoRef = useRef(null);
   const peerRef = useRef(null);
 
@@ -58,12 +62,11 @@ const VideoCall = () => {
       callerVideoRef.current.srcObject = stream;
     });
 
-    setShowAnswerButton(false);
-
-    setCallAccepted(true)
+    setCallAccepted(true);
 
     userVideoRef.current.srcObject = stream;
 
+    setShowAnswerButton(true);
   };
 
   useEffect(() => {
@@ -76,13 +79,12 @@ const VideoCall = () => {
 
       myPeer.on("connect", () => {
         console.log("¡Conexión establecida!");
+        setCallAccepted(true);
       });
 
       myPeer.on("stream", (stream) => {
         callerVideoRef.current.srcObject = stream; // Mostrar el stream del llamante
       });
-
-      setCallAccepted(true)
 
       userVideoRef.current.srcObject = stream;
     });
@@ -92,20 +94,42 @@ const VideoCall = () => {
     };
   }, [myPeer]);
 
+  /* Calll Cancelled */
+
+  const handleHangupCall = () => {
+    setCallReceived(false);
+    setShowAnswerButton(false);
+    socket.emit("hangupCall", { from: caller, to: tocall });
+  };
+
+  useEffect(() => {
+    socket.on("callCancelled", (data) => {
+      setCallReceived(false);
+      setShowAnswerButton(false);
+      console.log("La llamada fue cancelada:", data);
+    });
+
+    return () => {
+      socket.off("callCancelled");
+    };
+  }, []);
+
+  /* Calll Cancelled */
+
   /* sound configuration */
 
   useEffect(() => {
-    // Reproducir sonido cuando hay una llamada recibida
-    if (callReceived && !isRinging && showAnswerButton) {
-      const audio = new Audio(alarma);
-      audio.play();
-
-      setIsRinging(true);
-    } else if ((!callReceived || !showAnswerButton) && isRinging) {
-      setIsRinging(false);
-
+    if (playAlarm) {
+      audioRef.current = new Audio(alarmaAudio);
+      audioRef.current.play();
+      audioRef.current.loop = true;
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     }
-  }, [callReceived, isRinging, showAnswerButton]);
+  }, [playAlarm]);
 
   /* Configuration audio */
 
@@ -132,6 +156,24 @@ const VideoCall = () => {
     }
   };
 
+
+
+
+  useEffect(() => {
+    if (callReceived && !callAccepted) {
+      setPlayAlarm(true);
+    } else {
+      setPlayAlarm(false);
+    }
+  }, [callReceived, callAccepted]);
+  
+  useEffect(() => {
+    return () => {
+      setPlayAlarm(false); // Detener la alarma cuando se desmonta el componente
+    };
+  }, []);
+  
+
   return (
     <div className={styles.general}>
       <div className={styles.container_videos}>
@@ -140,7 +182,9 @@ const VideoCall = () => {
         </div>
         <div className={`${styles.border_video} ${styles.border_video2}`}>
           <video
-            className={`${styles.video_user} ${callAccepted ? styles.small : styles.large}`}
+            className={`${styles.video_user} ${
+              callAccepted ? styles.small : styles.large
+            }`}
             ref={userVideoRef}
             autoPlay
             muted
@@ -165,8 +209,11 @@ const VideoCall = () => {
       </div>
 
       <div className={styles.modal}>
-        {showAnswerButton && callReceived && tocall === user.UserId && (
-          <ModalCall handleCallAccept={handleCallAccept} />
+        {callReceived && !callAccepted && (
+          <ModalCall
+            handleCallAccept={handleCallAccept}
+            handleCancell={handleHangupCall}
+          />
         )}
       </div>
     </div>

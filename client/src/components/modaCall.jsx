@@ -3,7 +3,7 @@ import Image from "next/image";
 import profile from "../../public/Rectangle13.png";
 import { IoCloseOutline } from "react-icons/io5";
 import { FaPhone } from "react-icons/fa6";
-const ModalCall = ({handleCallAccept}) => {
+const ModalCall = ({handleCallAccept , handleCancell}) => {
   return (
     <div className={styles.general}>
       <div className={styles.modal_info}>
@@ -18,7 +18,7 @@ const ModalCall = ({handleCallAccept}) => {
           <button className={`${styles.button} ${styles.button_green}`} onClick={handleCallAccept}>
             <FaPhone/>
           </button>
-          <button className={`${styles.button} ${styles.button_red}`}>
+          <button className={`${styles.button} ${styles.button_red}`} onClick={ handleCancell } >
             <IoCloseOutline />
           </button>
         </div>

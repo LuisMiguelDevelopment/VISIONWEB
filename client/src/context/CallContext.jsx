@@ -3,7 +3,6 @@ import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useAuth } from "./authContext";
 
-
 const ENDPOINT = "http://localhost:3001";
 export const socket = io(ENDPOINT);
 
@@ -48,7 +47,7 @@ export const CallProvider = ({ children }) => {
 
   useEffect(() => {
     const handleReconnection = (user) => {
-      const userReconnect = user.UserId; 
+      const userReconnect = user.UserId;
       console.log("Reconexión del usuario:", userReconnect);
       socket.emit("setUserId", userReconnect); // Reasignar la ID de usuario al socket
     };
@@ -101,20 +100,18 @@ export const CallProvider = ({ children }) => {
 
   useEffect(() => {
     socket.on("callUser", (data) => {
-      if (!callReceived) {
-        console.log(data);
-        setCallReceived(true);
-        setCaller(data.from);
-        setTocall(data.userToCall);
-        setCallerSignal(data.signal);
-        setCallerStream(data.stream);
-      }
+      console.log(data);
+      setCallReceived(true);
+      setCaller(data.from);
+      setTocall(data.userToCall);
+      setCallerSignal(data.signal);
+      setCallerStream(data.stream);
     });
 
     return () => {
       socket.off("callUser");
     };
-  }, [callReceived]);
+  }, []);
 
   return (
     // En CallProvider
@@ -125,6 +122,7 @@ export const CallProvider = ({ children }) => {
         handleCall,
         socket,
         callReceived,
+        setCallReceived,
         tocall,
         caller,
         callerSignal,
