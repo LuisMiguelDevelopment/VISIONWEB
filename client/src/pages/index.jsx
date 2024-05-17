@@ -7,6 +7,7 @@ const Home = () => {
     <Slider>
       <div className={styles.general}>
         <VideoCall />
+        
       </div>
     </Slider>
   );

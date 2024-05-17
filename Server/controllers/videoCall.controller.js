@@ -50,6 +50,14 @@ export const callUser = (io) => {
       } else {
         console.error("User socket not found for user:", userToCall);
       }
+
+      // Emitir un evento similar al usuario que realiza la llamada
+      const callerSocketId = userSockets.get(from);
+      io.to(callerSocketId).emit("callUser", {
+        signal,
+        from,
+        userToCall,
+      });
     });
 
     socket.on("answerCall", async (data) => {
@@ -88,9 +96,9 @@ export const callUser = (io) => {
 
     socket.on("hangupCall", async (data) => {
       console.log("llamada cancelada", data);
-    
+
       const { from, to } = data;
-    
+
       const receiverSocketId = userSockets.get(from);
       const callerSocketId = userSockets.get(to);
 

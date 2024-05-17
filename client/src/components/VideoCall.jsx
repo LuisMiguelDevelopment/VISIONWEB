@@ -4,16 +4,13 @@ import { useAuth } from "@/context/authContext";
 import { socket } from "@/context/CallContext";
 import Peer from "simple-peer";
 import styles from "../styles/VideoCall.module.css";
-
-import { BsCameraVideo } from "react-icons/bs";
+import { BsCameraVideo, BsXLg } from "react-icons/bs";
 import { BsCameraVideoOff } from "react-icons/bs";
-
 import { PiMicrophoneLight } from "react-icons/pi";
 import { PiMicrophoneSlash } from "react-icons/pi";
-
 import ModalCall from "./modaCall";
-
 import alarmaAudio from "../../public/alarma.mp3";
+import { IoCloseOutline } from "react-icons/io5";
 
 const VideoCall = () => {
   const {
@@ -26,22 +23,20 @@ const VideoCall = () => {
     stream,
     userVideoRef,
     setCallReceived,
+    handleDisconnect,
   } = useCall();
 
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
-  const [isSharingScreen, setIsSharingScreen] = useState(false);
-
-
   const [showAnswerButton, setShowAnswerButton] = useState(true);
-
   const [playAlarm, setPlayAlarm] = useState(false); // Estado para controlar la alarma
   const audioRef = useRef(null);
-
   const [callAccepted, setCallAccepted] = useState(false);
-
+  const [callActive, setCallActive] = useState(false);
   const callerVideoRef = useRef(null);
   const peerRef = useRef(null);
+  const { user } = useAuth();
+  const [callEnd, setCallEnd] = useState(false);
 
   const handleCallAccept = () => {
     const peer = new Peer({ initiator: false, trickle: false, stream: stream });
@@ -94,7 +89,7 @@ const VideoCall = () => {
     };
   }, [myPeer]);
 
-  /* Calll Cancelled */
+  /* Call Cancelled */
 
   const handleHangupCall = () => {
     setCallReceived(false);
@@ -114,7 +109,20 @@ const VideoCall = () => {
     };
   }, []);
 
-  /* Calll Cancelled */
+  /* Call Cancelled */
+
+  useEffect(() => {
+    socket.on("callCancelled", () => {
+      setCallReceived(false);
+      setCallAccepted(false); // Restablecer el estado de aceptación de la llamada
+      setCallEnd(true);
+    });
+
+    return () => {
+      socket.off("callCancelled");
+      handleDisconnect(); // Desconectar al usuario si la llamada se cancela
+    };
+  }, []);
 
   /* sound configuration */
 
@@ -156,31 +164,51 @@ const VideoCall = () => {
     }
   };
 
-
-
-
   useEffect(() => {
     if (callReceived && !callAccepted) {
       setPlayAlarm(true);
+      setCallEnd(false); // Restablecer el estado de finalización de la llamada cuando se recibe una nueva llamada
     } else {
       setPlayAlarm(false);
     }
   }, [callReceived, callAccepted]);
-  
+
   useEffect(() => {
     return () => {
       setPlayAlarm(false); // Detener la alarma cuando se desmonta el componente
     };
   }, []);
-  
+
+  /* DISCONECT */
+
+  useEffect(() => {
+    // Cuando la llamada se recibe y se acepta, activamos la llamada
+    if (callReceived && callAccepted) {
+      setCallActive(true);
+    } else {
+      setCallActive(false);
+    }
+  }, [callReceived, callAccepted]);
+
+  /* DISCONECT */
 
   return (
     <div className={styles.general}>
       <div className={styles.container_videos}>
-        <div className={styles.border_video}>
-          <video className={styles.video} ref={callerVideoRef} autoPlay />
+        <div
+          className={`${styles.border_video} ${
+            callActive ? "" : styles.hidden
+          }`}
+        >
+          {!callEnd && (
+            <video className={styles.video} ref={callerVideoRef} autoPlay />
+          )}
         </div>
-        <div className={`${styles.border_video} ${styles.border_video2}`}>
+        <div
+          className={`${styles.border_video}  ${
+            callEnd ? styles.callEndUser : ""
+          } ${callAccepted ? styles.border_video2 : ""}`}
+        >
           <video
             className={`${styles.video_user} ${
               callAccepted ? styles.small : styles.large
@@ -206,6 +234,14 @@ const VideoCall = () => {
             <PiMicrophoneLight />
           )}
         </button>
+        {callAccepted && (
+          <button
+            className={styles.button_disconnect}
+            onClick={handleDisconnect}
+          >
+            <IoCloseOutline />
+          </button>
+        )}
       </div>
 
       <div className={styles.modal}>

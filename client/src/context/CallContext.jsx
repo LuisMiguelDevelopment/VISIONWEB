@@ -29,6 +29,8 @@ export const CallProvider = ({ children }) => {
   const [callerStream, setCallerStream] = useState(null);
   const [stream, setStream] = useState();
 
+
+
   const { user } = useAuth();
 
   useEffect(() => {
@@ -113,6 +115,14 @@ export const CallProvider = ({ children }) => {
     };
   }, []);
 
+  const handleDisconnect = () => {
+    if (myPeer) {
+      myPeer.destroy();
+      setMyPeer(null);
+      socket.emit("hangupCall", { from: tocall, to: caller });
+    }
+  };
+
   return (
     // En CallProvider
     <CallContext.Provider
@@ -131,6 +141,7 @@ export const CallProvider = ({ children }) => {
         callerStream,
         stream,
         userVideoRef,
+        handleDisconnect
       }}
     >
       {children}
