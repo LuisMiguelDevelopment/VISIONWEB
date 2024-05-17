@@ -20,7 +20,7 @@ export const FriendProvider = ({ children }) => {
     const fetchFriends = async () => {
       try {
         const res = await getMyFriends();
-        // Assuming res.data contains friendList as you've shown previously
+        
         setFriendList(res.data.friendList);
         setLoading(false);
       } catch (error) {

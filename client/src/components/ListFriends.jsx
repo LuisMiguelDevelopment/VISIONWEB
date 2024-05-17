@@ -11,19 +11,23 @@ import { useCall } from "../context/CallContext";
 
 const ListFriends = () => {
   const { friendList } = useFriend();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
   const [socket, setSocket] = useState(null);
   const { calls, handleCall } = useCall();
 
- 
+  useEffect(() => {
+    // Verificar que user no sea null antes de acceder a sus propiedades
+    if (profile) {
+      console.log(profile.NameUser);
+    }
+  }, [user]);
 
-   /**********************  USUARIO ONLINE *********************/
+  /**********************  USUARIO ONLINE *********************/
 
   useEffect(() => {
-  
     const connectToSocket = async () => {
       if (userId && token) {
         const newSocket = io("http://localhost:3001", {
@@ -64,32 +68,24 @@ const ListFriends = () => {
     return onlineUsers.includes(String(friendUserId));
   };
 
+  /**********************  USUARIO ONLINE *********************/
 
-    /**********************  USUARIO ONLINE *********************/
-
-
-
-   /**********************  CLICK PARA LLAMAR A UN AMIGO *********************/
-  const handleCallClick = (friendUserId) => {
-    console.log(socket)
-    console.log("Botón de llamada clickeado");
-
-    console.log(friendUserId)
-    console.log(userId)
-
-
+  /**********************  CLICK PARA LLAMAR A UN AMIGO *********************/
+  const handleCallClick = (friendUserId, friendName, friend) => {
+   
     if (socket) {
       handleCall({
         userToCall: friendUserId,
-        from: userId 
+        from: userId,
+        name: profile.NameUser,
+        nameCall: friend.NameUser,
       });
     } else {
       console.error("Socket is not available");
     }
   };
 
-/**********************  CLICK PARA LLAMAR A UN AMIGO *********************/
-
+  /**********************  CLICK PARA LLAMAR A UN AMIGO *********************/
 
   return (
     <>
@@ -104,10 +100,9 @@ const ListFriends = () => {
               <PiVideoCameraFill
                 className={styles.camera}
                 onClick={() =>
-                  handleCallClick(friend.UserId, friend.NameUser)
+                  handleCallClick(friend.UserId, friend.NameUser, friend)
                 }
               />
-
               <div
                 className={`${styles.indicator} ${
                   isFriendOnline(friend.UserId) ? styles.online : styles.offline

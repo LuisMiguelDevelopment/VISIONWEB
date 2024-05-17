@@ -24,6 +24,8 @@ const VideoCall = () => {
     userVideoRef,
     setCallReceived,
     handleDisconnect,
+    userName,
+    userNameCall
   } = useCall();
 
   const [isMuted, setIsMuted] = useState(false);
@@ -249,6 +251,8 @@ const VideoCall = () => {
           <ModalCall
             handleCallAccept={handleCallAccept}
             handleCancell={handleHangupCall}
+            UserName={userName}
+            UserCall={userNameCall}
           />
         )}
       </div>

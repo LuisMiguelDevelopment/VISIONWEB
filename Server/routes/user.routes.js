@@ -11,13 +11,7 @@ const router = Router();
 
 /* GET */
 router.get('/users', getUsers);
-router.get('/profile', verifyToken, (req, res) => {
-    // El middleware verifyToken ya ha verificado y decodificado el token
-    // Puedes acceder a la información del usuario desde req.user
-    const { Email, UserId } = req.user;
-    // Aquí puedes realizar operaciones relacionadas con obtener el perfil del usuario
-    res.status(200).json({ Email, UserId });
-  });
+router.get('/profile', verifyToken , getUserProfile );
 
 
 /* POST */

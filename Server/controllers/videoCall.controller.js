@@ -30,7 +30,7 @@ export const callUser = (io) => {
 
     socket.on("callUser", async (data) => {
       console.log("Evento callUser recibido:", data);
-      const { userToCall, signal, from } = data;
+      const { userToCall, signal, from , name , nameCall} = data;
       const receiverSocketId = userSockets.get(userToCall);
 
       if (!callRoom.has(userToCall)) {
@@ -46,6 +46,7 @@ export const callUser = (io) => {
           signal,
           from,
           userToCall,
+          name
         });
       } else {
         console.error("User socket not found for user:", userToCall);
@@ -57,6 +58,7 @@ export const callUser = (io) => {
         signal,
         from,
         userToCall,
+        nameCall
       });
     });
 

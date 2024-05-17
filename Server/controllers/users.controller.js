@@ -217,7 +217,7 @@ export const getUserProfile = async (req, res) => {
     const connection = await poolBody.connect();
     const request = connection.request();
     request.input("UserId", UserId);
-    const result = await request.query("SELECT * FROM Users WHERE UserId = @UserId");
+    const result = await request.query("SELECT NameUser , Email , UserId  , DateBirth FROM Users WHERE UserId = @UserId");
 
     // Verifica si se encontró un usuario con el ID proporcionado
     if (result.recordset.length === 0) {

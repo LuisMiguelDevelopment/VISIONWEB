@@ -22,7 +22,8 @@ export const CallProvider = ({ children }) => {
   const [caller, setCaller] = useState("");
   const [tocall, setTocall] = useState("");
   const [callerSignal, setCallerSignal] = useState();
-  const [me, setMe] = useState("");
+  const [userName, setUserName] = useState("");
+  const [userNameCall, setUserNameCall] = useState("");
   const [callReceived, setCallReceived] = useState(false);
   const [myPeer, setMyPeer] = useState(null);
   const userVideoRef = useRef(null);
@@ -32,6 +33,10 @@ export const CallProvider = ({ children }) => {
 
 
   const { user } = useAuth();
+
+
+
+
 
   useEffect(() => {
     // Obtener acceso al flujo de vídeo del usuario
@@ -108,6 +113,8 @@ export const CallProvider = ({ children }) => {
       setTocall(data.userToCall);
       setCallerSignal(data.signal);
       setCallerStream(data.stream);
+      setUserName(data.name);
+      setUserNameCall(data.nameCall);
     });
 
     return () => {
@@ -141,7 +148,9 @@ export const CallProvider = ({ children }) => {
         callerStream,
         stream,
         userVideoRef,
-        handleDisconnect
+        handleDisconnect,
+        userName,
+        userNameCall
       }}
     >
       {children}

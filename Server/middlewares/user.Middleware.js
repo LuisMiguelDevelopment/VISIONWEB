@@ -130,19 +130,15 @@ export const verifyToken = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({ message: "Unauthorized ran" });
   }
-
   try {
     jwt.verify(token, TOKEN_SECRET, (err, decoded) => {
       if (err) {
         return res.status(401).json({ message: "Unauthorized ran" });
       }
-
       // Decodificar el token y extraer el UserId y Email
       const { Email, UserId } = decoded;
-
       // Adjuntar el UserId al objeto req.user
       req.user = { Email, UserId };
-
       // Continuar con la ejecución del siguiente middleware o controlador
       next();
     });
