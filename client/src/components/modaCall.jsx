@@ -3,7 +3,8 @@ import Image from "next/image";
 import profile from "../../public/Rectangle13.png";
 import { IoCloseOutline } from "react-icons/io5";
 import { FaPhone } from "react-icons/fa6";
-const ModalCall = ({handleCallAccept , handleCancell , UserName , UserCall}) => {
+
+const ModalCall = ({ handleCallAccept, handleCancell, UserName, UserCall, isReceiver }) => {
   return (
     <div className={styles.general}>
       <div className={styles.modal_info}>
@@ -11,14 +12,16 @@ const ModalCall = ({handleCallAccept , handleCancell , UserName , UserCall}) => 
           <Image src={profile} className={styles.img} />
         </div>
         <div className={styles.modal_info_call}>
-          <span className={styles.span}>{UserName}{UserCall} </span>
+          <span className={styles.span}>{UserName}{UserCall}</span>
           <p className={styles.p}>is calling you</p>
         </div>
         <div className={styles.buttons}>
-          <button className={`${styles.button} ${styles.button_green}`} onClick={handleCallAccept}>
-            <FaPhone/>
-          </button>
-          <button className={`${styles.button} ${styles.button_red}`} onClick={ handleCancell } >
+          {isReceiver && (
+            <button className={`${styles.button} ${styles.button_green}`} onClick={handleCallAccept}>
+              <FaPhone />
+            </button>
+          )}
+          <button className={`${styles.button} ${styles.button_red}`} onClick={handleCancell}>
             <IoCloseOutline />
           </button>
         </div>

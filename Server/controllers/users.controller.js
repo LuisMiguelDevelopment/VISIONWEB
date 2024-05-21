@@ -1,7 +1,7 @@
 import { poolBody } from "../config/db.js";
 import { createTokenAccess, createRandomString } from "../lib/jwt.js";
 import { transporter } from "../config/config.js";
-import { config } from "dotenv";
+
 import { io } from "../index.js";
 // Función para escapar caracteres especiales en una cadena SQL
 const escapeString = (value) => {

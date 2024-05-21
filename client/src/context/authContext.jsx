@@ -7,7 +7,7 @@ import {
   updatePasswordRequest,
 } from "../pages/api/users";
 import Cookies from "js-cookie";
-
+import { useRouter } from "next/router";
 
 export const AuthContext = createContext();
 
@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errors, setErrors] = useState([]);
   const [profile, setProfile] = useState([]);
+  const router = useRouter();
 
   const signin = async (user) => {
     try {
@@ -72,9 +73,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
-
- 
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     router.push("/login");
+  //   }
+  // });
 
   useEffect(() => {
     const profile = async () => {
@@ -88,7 +91,6 @@ export const AuthProvider = ({ children }) => {
     };
     profile();
   }, []);
-
 
   const authenticateUser = async () => {
     const token = Cookies.get("token");

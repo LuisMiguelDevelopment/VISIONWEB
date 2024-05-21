@@ -253,6 +253,7 @@ const VideoCall = () => {
             handleCancell={handleHangupCall}
             UserName={userName}
             UserCall={userNameCall}
+            isReceiver={user.UserId === tocall}
           />
         )}
       </div>

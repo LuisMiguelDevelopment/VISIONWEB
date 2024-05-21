@@ -108,3 +108,24 @@
 .hidden{
   display: none;
 }
+
+
+
+@media screen and (max-width: 850px) {
+  .video_user.large {
+    width: 90vw; /* Tamaño grande */
+    height: auto;
+  }
+  
+  .video_user.small {
+    width: 200px; /* Tamaño pequeño */
+    height: 100%;
+  }
+
+
+  .video {
+    width: 90vw;
+    height: 100%;
+  }
+  
+}
