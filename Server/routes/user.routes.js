@@ -12,7 +12,7 @@ const router = Router();
 /* GET */
 router.get('/users', getUsers);
 router.get('/profile', verifyToken , getUserProfile );
-router.get('/search',  searchUser);
+router.get('/search',verifyToken , searchUser  );
 
 
 /* POST */

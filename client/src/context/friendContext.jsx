@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { getMyFriends } from "@/pages/api/friends";
+import { getMyFriends , getRequestFriends ,sendFriends  , acceptFriendRequest , deleteRequestFriend} from "@/pages/api/friends";
 
 export const FriendContext = createContext();
 
@@ -13,6 +13,7 @@ export const useFriend = () => {
 
 export const FriendProvider = ({ children }) => {
   const [friendList, setFriendList] = useState([]);
+  const [requestList, setRequestList] = useState({ friendRequests: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -31,12 +32,65 @@ export const FriendProvider = ({ children }) => {
 
     fetchFriends();
   }, []);
+  useEffect(() => {
+    const fetchRequest = async () => {
+      try {
+        const res = await getRequestFriends();
+        console.log(res.data)
+        setRequestList(res.data);
+        setLoading(false);
+      } catch (error) {
+        setError(error);
+        setLoading(false);
+      }
+    };
+
+    fetchRequest();
+  }, []);
+
+  
+  const sendFriendRequest = async (requestedUserId) => {
+    try {
+      await sendFriends(requestedUserId); // Usa la función de envío importada
+      console.log("Succefully sent")
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+    }
+  };
+
+  const acceptRequest = async (requestId) => {
+    try {
+      await acceptFriendRequest(requestId);
+      // Actualiza la lista de solicitudes de amigos
+      const res = await getRequestFriends();
+      setRequestList(res.data);
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+    }
+  };
+
+
+  const rejectRequest = async (requestId) => {
+    try {
+      await deleteRequestFriend(requestId);
+      // Actualiza la lista de solicitudes de amigos
+      const res = await getRequestFriends();
+      setRequestList(res.data);
+    } catch (error) {
+      console.error("Error rejecting friend request:", error);
+    }
+  };
+
 
   // Create an object with your desired structure here
   const friendsObject = {
     friendList,
     loading,
-    error
+    error,
+    sendFriendRequest,
+    requestList,
+    acceptRequest,
+    rejectRequest
   };
 
   return (

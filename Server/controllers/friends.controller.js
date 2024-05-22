@@ -71,7 +71,16 @@ export const sendFriendRequest = async (req, res) => {
       return res.status(409).json({ message: "Users are already friends" });
     }
 
-    // Insert new friend request (no status needed in Friends table)
+    // Verificar si ya existe una solicitud de amistad pendiente
+    const existingRequest = await request.query(
+      `SELECT * FROM Friends WHERE (RequestingUserId = @userId1 AND RequestedUserId = @userId2) OR (RequestingUserId = @userId2 AND RequestedUserId = @userId1) AND Status = 'PENDING'`
+    );
+
+    if (existingRequest.recordset.length > 0) {
+      return res.status(409).json({ message: "Friend request already pending" });
+    }
+
+    // Insertar nueva solicitud de amistad (no es necesario el estado en la tabla Friends)
     request.input("requestingUserId", requestingUserId);
     request.input("requestedUserId", requestedUserId);
 
@@ -89,6 +98,7 @@ export const sendFriendRequest = async (req, res) => {
     return res.status(500).json({ message: "Error sending friend request" });
   }
 };
+
 
 export const acceptFriendRequest = async (req, res) => {
   const requestId = parseInt(req.params.requestId);

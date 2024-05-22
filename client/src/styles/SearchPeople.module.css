@@ -11,9 +11,11 @@
   align-items: center;
 }
 
-.search {
-  position: relative;
+
+.list_users{
+  display: flex;
 }
+
 
 .customSearch {
   background-color: #ececec;
@@ -27,6 +29,7 @@
   flex-direction: column;
   color: #74acf0;
   margin-left: 15px;
+  position: relative;
 }
 
 .iconRequest {
@@ -41,7 +44,7 @@
   position: absolute;
   background-color: white;
   padding: 20px;
-  width: 100%;
+  width: auto;
   z-index: 1000;
   border-radius: 15px;
 }
@@ -50,6 +53,12 @@
 .list_users{
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.info_users{
+  display: flex;
+  margin: 10px;
 }
 
 .li{
@@ -63,4 +72,29 @@
   object-fit: cover;
   border-radius: 50px;
   margin: 0 5px
+}
+
+
+.requestButton{
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1CD793 ;
+  border-radius: 50%;
+  color: white;
+  height: 30px;
+  width: 30px;
+  font-size: 1.5rem;
+}
+
+
+
+@media screen and (max-width:600px ) {
+  .search_input {
+    position: absolute;
+    top: 60px;
+    z-index: 1001;
+  }
+  
 }

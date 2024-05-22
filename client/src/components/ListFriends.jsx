@@ -31,7 +31,7 @@ const ListFriends = () => {
     const connectToSocket = async () => {
       if (userId && token) {
         const newSocket = io("http://localhost:3001", {
-          query: { UserId: userId, token: token },
+          query: { userId, token }, // Corregir el nombre del parámetro a 'userId' en lugar de 'UserId'
         });
         setSocket(newSocket); // Asigna el socket al estado
         newSocket.on("reconnect_attempt", () => {
