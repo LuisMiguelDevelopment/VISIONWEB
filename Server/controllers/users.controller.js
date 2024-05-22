@@ -19,6 +19,39 @@ export const getUsers = async (req, res) => {
   }
 };
 
+export const searchUser = async (req, res) => {
+  const { name } = req.query;
+
+  if (!name) {
+    return res.status(400).json({ message: "Missing name parameter" });
+  }
+
+  try {
+    // Realiza una consulta a la base de datos para obtener los usuarios que coincidan con el nombre proporcionado
+    const connection = await poolBody.connect();
+    const request = connection.request();
+    request.input("Name", `%${name}%`);
+    const result = await request.query(
+      "SELECT * FROM Users WHERE CONCAT(NameUser, ' ', LastName) LIKE @Name"
+    );
+
+    // Verifica si se encontraron usuarios que coincidan con el nombre proporcionado
+    if (result.recordset.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No users found with the provided name" });
+    }
+
+    // Si se encuentran usuarios, devuelve los detalles en la respuesta
+    const users = result.recordset;
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Error searching users by name:", error);
+    return res.status(500).json({ message: "Error searching users by name" });
+  }
+};
+
 export const registerUser = async (req, res) => {
   const { NameUser, LastName, Email, PasswordKey, DateBirth } = req.body;
   try {
@@ -68,12 +101,14 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res, io) => {
   try {
     const { Email } = req.body;
-    
+
     // Consultar la base de datos para obtener el UserId asociado al correo electrónico
     const connection = await poolBody.connect();
     const request = connection.request();
     request.input("Email", Email);
-    const result = await request.query("SELECT UserId FROM Users WHERE Email = @Email");
+    const result = await request.query(
+      "SELECT UserId FROM Users WHERE Email = @Email"
+    );
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "User not found" });
@@ -83,27 +118,22 @@ export const loginUser = async (req, res, io) => {
 
     // Crear el token con el Email y UserId
     const token = await createTokenAccess({ Email, UserId });
-    
+
     // Establecer el token en la cookie de la respuesta
     res.cookie("token", token);
 
-    
-
-    console.log(UserId)
+    console.log(UserId);
 
     return res.status(200).json({
       Email,
       UserId,
-      token
+      token,
     });
   } catch (error) {
     console.error("Error logging in user:", error);
     return res.status(500).json({ message: "Error logging in user" });
   }
 };
-
-
-
 
 export const logout = async (req, res) => {
   res.cookie("token", "", {
@@ -207,7 +237,6 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-
 export const getUserProfile = async (req, res) => {
   // Extrae el ID de usuario de los parámetros de la ruta
   const UserId = req.user.UserId;
@@ -217,7 +246,9 @@ export const getUserProfile = async (req, res) => {
     const connection = await poolBody.connect();
     const request = connection.request();
     request.input("UserId", UserId);
-    const result = await request.query("SELECT NameUser , Email , UserId  , DateBirth FROM Users WHERE UserId = @UserId");
+    const result = await request.query(
+      "SELECT NameUser , Email , UserId  , DateBirth FROM Users WHERE UserId = @UserId"
+    );
 
     // Verifica si se encontró un usuario con el ID proporcionado
     if (result.recordset.length === 0) {

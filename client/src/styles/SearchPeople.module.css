@@ -1,0 +1,66 @@
+.searchPeople {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.search_input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search {
+  position: relative;
+}
+
+.customSearch {
+  background-color: #ececec;
+  color: #999999;
+}
+
+.request {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: #74acf0;
+  margin-left: 15px;
+}
+
+.iconRequest {
+  font-size: 2rem;
+}
+
+.spam {
+  font-size: 0.8rem;
+}
+
+.results {
+  position: absolute;
+  background-color: white;
+  padding: 20px;
+  width: 100%;
+  z-index: 1000;
+  border-radius: 15px;
+}
+
+
+.list_users{
+  display: flex;
+  align-items: center;
+}
+
+.li{
+  margin: 10px;
+}
+
+
+.image_profile{
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50px;
+  margin: 0 5px
+}

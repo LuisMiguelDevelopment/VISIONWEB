@@ -5,6 +5,7 @@ import {
   recoveryPasswordRequest,
   registerRequest,
   updatePasswordRequest,
+  searchUsers,
 } from "../pages/api/users";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errors, setErrors] = useState([]);
   const [profile, setProfile] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const router = useRouter();
 
   const signin = async (user) => {
@@ -79,6 +81,16 @@ export const AuthProvider = ({ children }) => {
   //   }
   // });
 
+  const search = async (name) => {
+    try {
+      const res = await searchUsers(name);
+      setSearchResults(res.data);
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     const profile = async () => {
       try {
@@ -124,6 +136,9 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuthenticated,
         errors,
+        searchResults,
+        setSearchResults,
+        search,
       }}
     >
       {children}
