@@ -21,6 +21,7 @@ export const getUsers = async (req, res) => {
 
 export const searchUser = async (req, res) => {
   const { name } = req.query;
+  const UserId = req.user.UserId; // Asumiendo que UserId está disponible en req.user
 
   if (!name) {
     return res.status(400).json({ message: "Missing name parameter" });
@@ -31,8 +32,9 @@ export const searchUser = async (req, res) => {
     const connection = await poolBody.connect();
     const request = connection.request();
     request.input("Name", `%${name}%`);
+    request.input("UserId", UserId); // Pasamos el UserId del usuario que realiza la búsqueda
     const result = await request.query(
-      "SELECT * FROM Users WHERE CONCAT(NameUser, ' ', LastName) LIKE @Name"
+      "SELECT * FROM Users WHERE CONCAT(NameUser, ' ', LastName) LIKE @Name AND UserId <> @UserId"
     );
 
     // Verifica si se encontraron usuarios que coincidan con el nombre proporcionado

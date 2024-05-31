@@ -30,11 +30,17 @@ export const callUser = (io) => {
 
     socket.on("callUser", async (data) => {
       console.log("Evento callUser recibido:", data);
-      const { userToCall, signal, from , name , nameCall} = data;
+      const { userToCall, signal, from, name, nameCall } = data;
       const receiverSocketId = userSockets.get(userToCall);
 
       if (!callRoom.has(userToCall)) {
         callRoom.set(userToCall, new Set());
+      }
+
+      if (callRoom.get(userToCall).size > 0) {
+        // Emitir evento solo al usuario que intenta llamar a otro usuario ya en llamada
+        socket.emit("userInCall", { userToCall });
+        return;
       }
 
       callRoom.get(userToCall).add(from);
@@ -46,7 +52,7 @@ export const callUser = (io) => {
           signal,
           from,
           userToCall,
-          name
+          name,
         });
       } else {
         console.error("User socket not found for user:", userToCall);
@@ -58,7 +64,7 @@ export const callUser = (io) => {
         signal,
         from,
         userToCall,
-        nameCall
+        nameCall,
       });
     });
 
@@ -112,6 +118,17 @@ export const callUser = (io) => {
         to,
         from,
       });
+
+
+      if (callRoom.has(receiverSocketId)) {
+        callRoom.get(receiverSocketId).delete(callerSocketId);
+        // Si el conjunto está vacío después de eliminar al usuario,
+        // también puedes eliminar la entrada de callRoom
+        if (callRoom.get(receiverSocketId).size === 0) {
+          callRoom.delete(receiverSocketId);
+        }
+      }
+
     });
   });
 };

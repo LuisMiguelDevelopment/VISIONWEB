@@ -25,7 +25,7 @@ const VideoCall = () => {
     setCallReceived,
     handleDisconnect,
     userName,
-    userNameCall
+    userNameCall,
   } = useCall();
 
   const [isMuted, setIsMuted] = useState(false);
@@ -39,6 +39,7 @@ const VideoCall = () => {
   const peerRef = useRef(null);
   const { user } = useAuth();
   const [callEnd, setCallEnd] = useState(false);
+  const [inCall, setInCall] = useState(false);
 
   const handleCallAccept = () => {
     const peer = new Peer({ initiator: false, trickle: false, stream: stream });
@@ -123,6 +124,18 @@ const VideoCall = () => {
     return () => {
       socket.off("callCancelled");
       handleDisconnect(); // Desconectar al usuario si la llamada se cancela
+    };
+  }, []);
+
+  useEffect(() => {
+    socket.on("userInCall", ({ userToCall }) => {
+      // Aquí puedes mostrar un mensaje al usuario indicando que el usuario con ID 'userToCall' está en una llamada.
+      console.log(`El usuario con ID ${userToCall} está en una llamada.`);
+      setInCall(true);
+    });
+
+    return () => {
+      socket.off("userInCall");
     };
   }, []);
 
@@ -247,14 +260,19 @@ const VideoCall = () => {
       </div>
 
       <div className={styles.modal}>
-        {callReceived && !callAccepted && (
-          <ModalCall
-            handleCallAccept={handleCallAccept}
-            handleCancell={handleHangupCall}
-            UserName={userName}
-            UserCall={userNameCall}
-            isReceiver={user.UserId === tocall}
-          />
+        {inCall ? (
+          <div>En llamada...</div>
+        ) : (
+          callReceived &&
+          !callAccepted && (
+            <ModalCall
+              handleCallAccept={handleCallAccept}
+              handleCancell={handleHangupCall}
+              UserName={userName}
+              UserCall={userNameCall}
+              isReceiver={user.UserId === tocall}
+            />
+          )
         )}
       </div>
     </div>

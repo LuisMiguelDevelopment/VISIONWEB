@@ -43,7 +43,7 @@ const SearchPeople = () => {
                       <Image className={styles.image_profile} src={pruebaimg} />
                       <li className={styles.li} key={person.UserId}>
                         {person.NameUser}
-                        {" " + person.LastName} {person.UserId}
+                        {" " + person.LastName}
                       </li>
                     </div>
                     <div className={styles.button_send}>
