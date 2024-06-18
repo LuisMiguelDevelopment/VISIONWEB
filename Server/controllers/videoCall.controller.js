@@ -1,8 +1,8 @@
 import { poolBody } from "../config/db.js";
 
-const userSockets = new Map();
+export const userSockets = new Map();
 
-const callRoom = new Map();
+
 
 export const callUser = (io) => {
   io.on("connection", async (socket) => {

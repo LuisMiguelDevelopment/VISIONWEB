@@ -1,5 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { getMyFriends , getRequestFriends ,sendFriends  , acceptFriendRequest , deleteRequestFriend} from "@/pages/api/friends";
+import { getMyFriends, getRequestFriends, sendFriends, acceptFriendRequest, deleteRequestFriend } from "@/pages/api/friends";
+import io from 'socket.io-client';
+import { useAuth } from "./authContext";
+
+const ENDPOINT = "http://localhost:3001";
+export const socket = io(ENDPOINT);
 
 export const FriendContext = createContext();
 
@@ -16,73 +21,112 @@ export const FriendProvider = ({ children }) => {
   const [requestList, setRequestList] = useState({ friendRequests: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const fetchFriends = async () => {
-      try {
-        const res = await getMyFriends();
-        
-        setFriendList(res.data.friendList);
-        setLoading(false);
-      } catch (error) {
-        setError(error);
-        setLoading(false);
-      }
-    };
+    if (user) {
+      const userId = user.UserId;
+      socket.emit("setUserId2", userId);
+    }
+  }, [user]);
 
+  const fetchRequest = async () => {
+    try {
+      const res = await getRequestFriends();
+      setRequestList(res.data);
+      console.log(res.data);
+      setLoading(false);
+    } catch (error) {
+      setError(error);
+      setLoading(false);
+    }
+  };
+
+  const fetchFriends = async () => {
+    try {
+      const res = await getMyFriends();
+      setFriendList(res.data.friendList);
+      setLoading(false);
+    } catch (error) {
+      setError(error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchFriends();
-  }, []);
-  useEffect(() => {
-    const fetchRequest = async () => {
-      try {
-        const res = await getRequestFriends();
-        console.log(res.data)
-        setRequestList(res.data);
-        setLoading(false);
-      } catch (error) {
-        setError(error);
-        setLoading(false);
-      }
-    };
-
     fetchRequest();
   }, []);
 
-  
+  useEffect(() => {
+    socket.on("requestSend", (data) => {
+      console.log("Nueva solicitud de amistad recibida:", data);
+      fetchRequest();
+    });
+
+    return () => {
+      socket.off("requestSend");
+    };
+  }, []);
+
+  useEffect(() => {
+    socket.on("acceptSend", (data) => {
+      console.log("Solicitud de amistad aceptada:", data);
+      fetchFriends();  // Actualiza la lista de amigos cuando se acepte la solicitud
+    });
+
+    return () => {
+      socket.off("acceptSend");
+    };
+  }, []);
+
   const sendFriendRequest = async (requestedUserId) => {
     try {
-      await sendFriends(requestedUserId); // Usa la función de envío importada
-      console.log("Succefully sent")
+      await sendFriends(requestedUserId);
+      socket.emit("sendFriendRequest", { requestedUserId: requestedUserId });
+      console.log("Solicitud de amistad enviada con éxito");
     } catch (error) {
-      console.error("Error sending friend request:", error);
+      console.error("Error enviando la solicitud de amistad:", error);
     }
   };
 
   const acceptRequest = async (requestId) => {
     try {
+      // Encuentra la solicitud en el requestList
+      const request = requestList.friendRequests.find(req => req.FriendRequestId === requestId);
+      if (!request) {
+        throw new Error("Solicitud no encontrada en la lista");
+      }
+
+      // Obtener los IDs de RequestingUserId y RequestedUserId
+      const { RequestingUserId, RequestedUserId } = request;
+
+      // Acepta la solicitud de amistad
       await acceptFriendRequest(requestId);
-      // Actualiza la lista de solicitudes de amigos
-      const res = await getRequestFriends();
-      setRequestList(res.data);
+
+      // Emitir el evento del socket con los IDs
+      socket.emit("acceptFriend", {
+        requestingUserId: RequestingUserId,
+        requestedUserId: RequestedUserId
+      });
+
+      // Recargar las solicitudes de amistad
+      fetchRequest();
+      fetchFriends(); // Actualiza la lista de amigos localmente también
     } catch (error) {
-      console.error("Error accepting friend request:", error);
+      console.error("Error aceptando la solicitud de amistad:", error);
     }
   };
-
 
   const rejectRequest = async (requestId) => {
     try {
       await deleteRequestFriend(requestId);
-      // Actualiza la lista de solicitudes de amigos
-      const res = await getRequestFriends();
-      setRequestList(res.data);
+      fetchRequest(); // Vuelve a cargar las solicitudes de amistad
     } catch (error) {
-      console.error("Error rejecting friend request:", error);
+      console.error("Error rechazando la solicitud de amistad:", error);
     }
   };
 
-
-  // Create an object with your desired structure here
   const friendsObject = {
     friendList,
     loading,

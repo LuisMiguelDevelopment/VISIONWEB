@@ -11,11 +11,13 @@ const ModalRequest = ({ modalRequest, setModalRequest }) => {
   const [pendingRequests, setPendingRequests] = useState([]);
 
   useEffect(() => {
-    // Filtrar solicitudes pendientes
-    const pending = requestList.friendRequests.filter(
-      (request) => request.Status === "PENDING"
-    );
-    setPendingRequests(pending);
+    if (requestList && requestList.friendRequests) {
+      // Filtra las solicitudes pendientes
+      const pending = requestList.friendRequests.filter(
+        (request) => request.Status === "PENDING"
+      );
+      setPendingRequests(pending);
+    }
   }, [requestList]);
 
   const handleToggleModal = () => {
@@ -30,13 +32,19 @@ const ModalRequest = ({ modalRequest, setModalRequest }) => {
       <div className={styles.container_user}>
         {pendingRequests.length === 0 ? (
           <div className={styles.no_requests}>
-            <p>No pending friend requests. 🥺</p>
+            <p>No hay solicitudes pendientes de amistad. 🥺</p>
           </div>
         ) : (
           pendingRequests.map((request) => (
             <div key={request.FriendRequestId} className={styles.info_friend}>
               <div className={styles.info_request}>
-                <Image className={styles.image_profile} src={pruebaimg} />
+                <Image
+                  className={styles.image_profile}
+                  src={pruebaimg}
+                  alt="Profile"
+                  width={50}
+                  height={50}
+                />
                 <span className={styles.span}>
                   {`${request.RequestingUserName} ${request.RequestingUserLastName}`}
                 </span>
