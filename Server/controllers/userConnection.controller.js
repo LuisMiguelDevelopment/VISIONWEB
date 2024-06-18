@@ -2,7 +2,7 @@ import { poolBody } from "../config/db.js";
 
 export const connectedUsers = {};
 
-export const userSocketMap = new Map();
+const userSocketMap = new Map();
 
 export const userConnection = (io) => {
   // Objeto para almacenar los usuarios conectados

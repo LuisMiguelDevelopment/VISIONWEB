@@ -14,6 +14,7 @@ import friendRoutes from "./routes/friends.routes.js";
 /* CONTROLLER CALL */
 import { userConnection } from "./controllers/userConnection.controller.js";
 import { callUser } from "./controllers/videoCall.controller.js";
+import { requestFriend } from "./controllers/friends.controller.js";
 const app = express();
 
 app.use(
@@ -48,6 +49,7 @@ connectionDB();
 
 userConnection(io);
 callUser(io);
+requestFriend(io);
 
 server.listen(PORT, () => {
   console.log("Server is running on PORT: " + PORT);
