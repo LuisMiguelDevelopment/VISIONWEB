@@ -1,8 +1,8 @@
 import { poolBody } from "../config/db.js";
 import { createTokenAccess, createRandomString } from "../lib/jwt.js";
 import { transporter } from "../config/config.js";
-import { config } from "dotenv";
 
+import { io } from "../index.js";
 // Función para escapar caracteres especiales en una cadena SQL
 const escapeString = (value) => {
   return value.replace(/'/g, "''");
@@ -16,6 +16,39 @@ export const getUsers = async (req, res) => {
     console.log(users.recordsets);
   } catch (error) {
     res.status(500).send({ message: "Error listing users" });
+  }
+};
+
+export const searchUser = async (req, res) => {
+  const { name } = req.query;
+
+  if (!name) {
+    return res.status(400).json({ message: "Missing name parameter" });
+  }
+
+  try {
+    // Realiza una consulta a la base de datos para obtener los usuarios que coincidan con el nombre proporcionado
+    const connection = await poolBody.connect();
+    const request = connection.request();
+    request.input("Name", `%${name}%`);
+    const result = await request.query(
+      "SELECT * FROM Users WHERE CONCAT(NameUser, ' ', LastName) LIKE @Name"
+    );
+
+    // Verifica si se encontraron usuarios que coincidan con el nombre proporcionado
+    if (result.recordset.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No users found with the provided name" });
+    }
+
+    // Si se encuentran usuarios, devuelve los detalles en la respuesta
+    const users = result.recordset;
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Error searching users by name:", error);
+    return res.status(500).json({ message: "Error searching users by name" });
   }
 };
 
@@ -48,7 +81,7 @@ export const registerUser = async (req, res) => {
     const token = await createTokenAccess({ Email, UserId });
 
     // Establecer el token en la cookie de la respuesta
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token);
 
     await connection.close();
 
@@ -65,36 +98,42 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
-export const loginUser = async (req, res) => {
+export const loginUser = async (req, res, io) => {
   try {
     const { Email } = req.body;
-    
+
     // Consultar la base de datos para obtener el UserId asociado al correo electrónico
     const connection = await poolBody.connect();
     const request = connection.request();
     request.input("Email", Email);
-    const result = await request.query("SELECT UserId FROM Users WHERE Email = @Email");
+    const result = await request.query(
+      "SELECT UserId FROM Users WHERE Email = @Email"
+    );
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     const UserId = result.recordset[0].UserId;
 
     // Crear el token con el Email y UserId
     const token = await createTokenAccess({ Email, UserId });
-    
+
     // Establecer el token en la cookie de la respuesta
-    res.cookie("token", token, { httpOnly: true , secure:true });
+    res.cookie("token", token);
+
+    console.log(UserId);
 
     return res.status(200).json({
       Email,
       UserId,
-      token
+      token,
     });
   } catch (error) {
     console.error("Error logging in user:", error);
     return res.status(500).json({ message: "Error logging in user" });
   }
 };
-
-
 
 export const logout = async (req, res) => {
   res.cookie("token", "", {
@@ -195,5 +234,35 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.error("Error resetting password:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getUserProfile = async (req, res) => {
+  // Extrae el ID de usuario de los parámetros de la ruta
+  const UserId = req.user.UserId;
+
+  try {
+    // Realiza una consulta a la base de datos para obtener los detalles del usuario por su ID
+    const connection = await poolBody.connect();
+    const request = connection.request();
+    request.input("UserId", UserId);
+    const result = await request.query(
+      "SELECT NameUser , Email , UserId  , DateBirth FROM Users WHERE UserId = @UserId"
+    );
+
+    // Verifica si se encontró un usuario con el ID proporcionado
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Si se encuentra el usuario, devuelve sus detalles en la respuesta
+    const userProfile = result.recordset[0];
+
+    io.emit("userConnected", { UserId: UserId });
+
+    return res.status(200).json(userProfile);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return res.status(500).json({ message: "Error fetching user profile" });
   }
 };

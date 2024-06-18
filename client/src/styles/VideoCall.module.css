@@ -1,0 +1,131 @@
+.general {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 90vh;
+  position: relative;
+}
+
+.container_videos {
+  position: relative;
+}
+
+.border_video {
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.video {
+  width: 60vw;
+  height: 100%;
+}
+
+.video_user {
+  border-radius: 15px;
+  transition: all 0.5s ease-in-out; /* Añadir transición para suavizar el cambio de tamaño */
+}
+
+.video_user.large {
+  width: 60vw; /* Tamaño grande */
+  height: auto;
+}
+
+.video_user.small {
+  width: 200px; /* Tamaño pequeño */
+  height: 100%;
+}
+
+.border_video2 {
+  position: absolute;
+  bottom: 25px;
+  right: 20px;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  margin-top: 20px;
+}
+.button_options {
+  background-color: rgb(255, 254, 254);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  border: none;
+  font-size: 30px;
+  border-radius: 50px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+}
+
+.camera_off {
+  color: rgb(250, 2, 2);
+}
+
+.camera_on {
+  color: rgb(54, 54, 54);
+}
+.microphone_off {
+  color: rgb(250, 2, 2);
+}
+
+.button_disconnect {
+  background-color:  rgb(245, 57, 57);
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  font-size: 30px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+}
+
+.button_disconnect:hover{
+  background-color:  rgb(223, 68, 68);
+}
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.callEnd {
+  display: none;
+}
+
+.hidden{
+  display: none;
+}
+
+
+
+@media screen and (max-width: 850px) {
+  .video_user.large {
+    width: 90vw; /* Tamaño grande */
+    height: auto;
+  }
+  
+  .video_user.small {
+    width: 200px; /* Tamaño pequeño */
+    height: 100%;
+  }
+
+
+  .video {
+    width: 90vw;
+    height: 100%;
+  }
+  
+}

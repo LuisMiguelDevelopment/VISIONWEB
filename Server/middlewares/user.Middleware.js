@@ -67,21 +67,25 @@ export const CheckEmailExistRegister = async (req, res, next) => {
     }
 }
 
-  export const requiredUser = (req, res, next) => {
-    const token = req.cookies.token;
+  
+export const requiredUser = (req, res, next) => {
+  const token = req.cookies.token;
 
-    if (!token) {
-        return res.status(401).json({ message: "No token, Authorization denied" });
-    }
+  if (!token) {
+      return res.status(401).json({ message: "No token, Authorization denied" });
+  }
 
-    try {
-        const decoded = jwt.verify(token, TOKEN_SECRET);
-        console.log(decoded)
-        req.user = decoded; // Asegúrate de que el ID de usuario está presente en el token
-        next();
-    } catch (error) {
-        return res.status(403).json({ message: 'Invalid token' });
-    }
+  try {
+      const decoded = jwt.verify(token, TOKEN_SECRET);
+      console.log(decoded)
+      req.user = decoded; // Asegúrate de que el ID de usuario está presente en el token
+      
+      // Actualizar la sesión del usuario en la base de datos
+
+      next();
+  } catch (error) {
+      return res.status(403).json({ message: 'Invalid token' });
+  }
 };
 
 // Middleware para comparar la contraseña del usuario con la almacenada en la base de datos
@@ -119,24 +123,27 @@ export const comparePassword = async (req, res, next) => {
 };
 
 
+
 export const verifyToken = async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized ran" });
   }
-
-  jwt.verify(token, TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: "Unauthorized ran" });
-    }
-
-    // Decodificar el token y extraer el UserId
-    const { Email, UserId } = decoded;
-
-    // Adjuntar el UserId al objeto req.user
-    req.user = { Email, UserId };
-
-    next(); // Pasamos al siguiente middleware o controlador
-  });
+  try {
+    jwt.verify(token, TOKEN_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ message: "Unauthorized ran" });
+      }
+      // Decodificar el token y extraer el UserId y Email
+      const { Email, UserId } = decoded;
+      // Adjuntar el UserId al objeto req.user
+      req.user = { Email, UserId };
+      // Continuar con la ejecución del siguiente middleware o controlador
+      next();
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Server error" });
+  }
 };

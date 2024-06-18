@@ -17,11 +17,13 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.18.3",
+    "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mssql": "^10.0.2",
     "nodemailer": "^6.9.12",
     "socket.io": "^4.7.4",
+    "socket.io-stream": "^0.9.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {

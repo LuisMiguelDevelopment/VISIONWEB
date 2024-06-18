@@ -4,6 +4,7 @@
     display: flex;
     justify-content: space-between;
     height: 50px;
+    margin-top: 5px;
     
 }
 
@@ -32,6 +33,13 @@
     color: #2381E9;
     font-size: 25px;
 }
+
+.indicator {
+    height: 7px;
+    width: 7px;
+    border-radius: 50px;
+    margin-left: 10px;
+  }
 
 .online{
     background-color: #1CD793;

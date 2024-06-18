@@ -1,11 +1,14 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import {
   loginRequest,
+  profileRequest,
   recoveryPasswordRequest,
   registerRequest,
   updatePasswordRequest,
+  searchUsers,
 } from "../pages/api/users";
 import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
 export const AuthContext = createContext();
 
@@ -22,6 +25,9 @@ export const AuthProvider = ({ children }) => {
   const [request, setRequest] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errors, setErrors] = useState([]);
+  const [profile, setProfile] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const router = useRouter();
 
   const signin = async (user) => {
     try {
@@ -62,32 +68,60 @@ export const AuthProvider = ({ children }) => {
 
   const updatePassword = async (token, newPassword) => {
     try {
-      await updatePasswordRequest({token, newPassword})
-      console.log(token , newPassword)
+      await updatePasswordRequest({ token, newPassword });
+      console.log(token, newPassword);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     router.push("/login");
+  //   }
+  // });
+
+  const search = async (name) => {
+    try {
+      const res = await searchUsers(name);
+      setSearchResults(res.data);
+      console.log(res.data);
     } catch (error) {
       console.log(error);
     }
   };
 
   useEffect(() => {
-    async function checkLogin() {
-      const cookies = Cookies.get();
-      if (!cookies.token) {
+    const profile = async () => {
+      try {
+        const res = await profileRequest();
+        setProfile(res.data);
+        console.log(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    profile();
+  }, []);
+
+  const authenticateUser = async () => {
+    const token = Cookies.get("token");
+    if (token) {
+      try {
+        const res = await profileRequest();
+        setIsAuthenticated(true);
+        setUser(res.data);
+      } catch (error) {
+        console.error("Error authenticating user:", error);
         setIsAuthenticated(false);
         setUser(null);
-      } else {
-        try {
-          const res = await loginRequest(); // Aquí deberías pasar cualquier dato necesario para obtener los datos del usuario
-          setIsAuthenticated(true);
-          setUser(res.data);
-        } catch (error) {
-          console.log(error);
-          setIsAuthenticated(false);
-          setUser(null);
-        }
+        Cookies.remove("token");
       }
     }
-    checkLogin();
+  };
+
+  useEffect(() => {
+    authenticateUser();
   }, []);
 
   return (
@@ -97,10 +131,14 @@ export const AuthProvider = ({ children }) => {
         login,
         recovery,
         request,
+        profile,
         updatePassword,
         user,
         isAuthenticated,
         errors,
+        searchResults,
+        setSearchResults,
+        search,
       }}
     >
       {children}

@@ -5,7 +5,7 @@ import { requiredUser , verifyToken } from '../middlewares/user.Middleware.js';
 const router = Router();
 
 /* GET */
-router.get('/friends' , verifyToken, requiredUser, getFriendRequest);
+router.get('/friends-request' , verifyToken, requiredUser, getFriendRequest);
 router.get('/List-friends' , verifyToken, requiredUser, ListFriends);
 
 /* POST  */
