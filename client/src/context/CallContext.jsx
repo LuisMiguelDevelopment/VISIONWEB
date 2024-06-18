@@ -30,7 +30,7 @@ export const CallProvider = ({ children }) => {
   const [callerStream, setCallerStream] = useState(null);
   const [stream, setStream] = useState();
   const [userIsBusy , setUserIsBusy] = useState(false);
-
+  const [callIsBusyClose, setCallIsBusyClose] = useState(false);
 
 
   const { user } = useAuth();
@@ -130,42 +130,60 @@ export const CallProvider = ({ children }) => {
       socket.emit("hangupCall", { from: tocall, to: caller });
     }
   };
+
+
+
+ 
   
 
-  useEffect(()=>{
-
-    socket.on("callFailed",(data)=>{
+  useEffect(() => {
+    socket.on('callFailed', (data) => {
       console.log(data);
       setUserIsBusy(true);
-    })
-  })
+      setCallIsBusyClose(false);
+    });
+
+    return () => {
+      socket.off('callFailed');
+    };
+  }, []);
+
+  const handleCloseIsBusy = () => {
+    setCallIsBusyClose(true);
+    setUserIsBusy(false); // Reset userIsBusy when the busy modal is closed
+  };
+
 
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      event.preventDefault();
-      event.returnValue = ""; // For some older browsers
-
-      // Show confirmation dialog
+      // Mostrar mensaje de confirmación
       const confirmationMessage = "¿Estás seguro que quieres salir y terminar la llamada?";
+      event.preventDefault();
       event.returnValue = confirmationMessage; // Standard-compliant browsers
       return confirmationMessage; // Old IE
     };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-
+  
+    const handleUnload = () => {
       if (myPeer) {
         myPeer.destroy();
         setMyPeer(null);
+  
+        // Emitir el evento de colgar llamada
         socket.emit("hangupCall", { from: tocall, to: caller });
       }
-    
-
+    };
+  
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+  
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
     };
-  }, []);
+  }, [myPeer, tocall, caller]);
+  
+  
 
 
   return (
@@ -189,7 +207,10 @@ export const CallProvider = ({ children }) => {
         handleDisconnect,
         userName,
         userNameCall,
-        userIsBusy
+        userIsBusy,
+        setUserIsBusy,
+        handleCloseIsBusy,
+        callIsBusyClose
       }}
     >
       {children}

@@ -27,13 +27,16 @@ const VideoCall = () => {
     handleDisconnect,
     userName,
     userNameCall,
-    userIsBusy
+    userIsBusy,
+    setUserIsBusy,
+    handleCloseIsBusy,
+    callIsBusyClose
   } = useCall();
 
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [showAnswerButton, setShowAnswerButton] = useState(true);
-  const [playAlarm, setPlayAlarm] = useState(false); // Estado para controlar la alarma
+  const [playAlarm, setPlayAlarm] = useState(false);
   const audioRef = useRef(null);
   const [callAccepted, setCallAccepted] = useState(false);
   const [callActive, setCallActive] = useState(false);
@@ -41,7 +44,7 @@ const VideoCall = () => {
   const peerRef = useRef(null);
   const { user } = useAuth();
   const [callEnd, setCallEnd] = useState(false);
-  const [ callIsBusyClose , setCallIsBusyClose ] = useState(false);
+
 
   const handleCallAccept = () => {
     const peer = new Peer({ initiator: false, trickle: false, stream: stream });
@@ -83,7 +86,7 @@ const VideoCall = () => {
       });
 
       myPeer.on("stream", (stream) => {
-        callerVideoRef.current.srcObject = stream; // Mostrar el stream del llamante
+        callerVideoRef.current.srcObject = stream;
       });
 
       userVideoRef.current.srcObject = stream;
@@ -94,42 +97,43 @@ const VideoCall = () => {
     };
   }, [myPeer]);
 
-  /* Call Cancelled */
-
   const handleHangupCall = () => {
     setCallReceived(false);
     setShowAnswerButton(false);
     socket.emit("hangupCall", { from: caller, to: tocall });
+    setUserIsBusy(false); // Reset the userIsBusy state when call is hung up
   };
 
   useEffect(() => {
-    socket.on("callCancelled", (data) => {
+    const handleCallCancelled = (data) => {
       setCallReceived(false);
       setShowAnswerButton(false);
       console.log("La llamada fue cancelada:", data);
-    });
+      setUserIsBusy(false); // Reset the userIsBusy state when call is cancelled
+    };
+
+    socket.on("callCancelled", handleCallCancelled);
 
     return () => {
-      socket.off("callCancelled");
+      socket.off("callCancelled", handleCallCancelled);
     };
   }, []);
-
-  /* Call Cancelled */
 
   useEffect(() => {
-    socket.on("callCancelled", () => {
+    const handleCallCancelled = () => {
       setCallReceived(false);
-      setCallAccepted(false); // Restablecer el estado de aceptación de la llamada
+      setCallAccepted(false);
       setCallEnd(true);
-    });
+      setUserIsBusy(false); // Reset the userIsBusy state when call is cancelled
+    };
+
+    socket.on("callCancelled", handleCallCancelled);
 
     return () => {
-      socket.off("callCancelled");
-      handleDisconnect(); // Desconectar al usuario si la llamada se cancela
+      socket.off("callCancelled", handleCallCancelled);
+      handleDisconnect();
     };
   }, []);
-
-  /* sound configuration */
 
   useEffect(() => {
     if (playAlarm) {
@@ -144,8 +148,6 @@ const VideoCall = () => {
     }
   }, [playAlarm]);
 
-  /* Configuration audio */
-
   const toggleAudio = () => {
     const stream = userVideoRef.current.srcObject;
     const audioTracks = stream.getAudioTracks();
@@ -154,8 +156,6 @@ const VideoCall = () => {
     });
     setIsMuted(!isMuted);
   };
-
-  /* Configuration video */
 
   const toggleVideo = () => {
     const stream = userVideoRef.current.srcObject;
@@ -172,7 +172,7 @@ const VideoCall = () => {
   useEffect(() => {
     if (callReceived && !callAccepted) {
       setPlayAlarm(true);
-      setCallEnd(false); // Restablecer el estado de finalización de la llamada cuando se recibe una nueva llamada
+      setCallEnd(false);
     } else {
       setPlayAlarm(false);
     }
@@ -180,14 +180,11 @@ const VideoCall = () => {
 
   useEffect(() => {
     return () => {
-      setPlayAlarm(false); // Detener la alarma cuando se desmonta el componente
+      setPlayAlarm(false);
     };
   }, []);
 
-  /* DISCONECT */
-
   useEffect(() => {
-    // Cuando la llamada se recibe y se acepta, activamos la llamada
     if (callReceived && callAccepted) {
       setCallActive(true);
     } else {
@@ -195,38 +192,27 @@ const VideoCall = () => {
     }
   }, [callReceived, callAccepted]);
 
-  /* DISCONECT */
 
-
-  const handleCloseIsBusy = () =>{
-    setCallIsBusyClose(!callIsBusyClose)
-    console.log('se cierra')
-  }
-
-
-
+  
 
   return (
     <div className={styles.general}>
-      {userIsBusy && callIsBusyClose &&
+      {userIsBusy && !callIsBusyClose && (
         <UserIsBusy handleClose={handleCloseIsBusy} />
-      }
+      )}
       <div className={styles.container_videos}>
         <div
-          className={`${styles.border_video} ${callActive ? "" : styles.hidden
-            }`}
+          className={`${styles.border_video} ${callActive ? "" : styles.hidden}`}
         >
           {!callEnd && (
             <video className={styles.video} ref={callerVideoRef} autoPlay />
           )}
         </div>
         <div
-          className={`${styles.border_video}  ${callEnd ? styles.callEndUser : ""
-            } ${callAccepted ? styles.border_video2 : ""}`}
+          className={`${styles.border_video} ${callEnd ? styles.callEndUser : ""} ${callAccepted ? styles.border_video2 : ""}`}
         >
           <video
-            className={`${styles.video_user} ${callAccepted ? styles.small : styles.large
-              }`}
+            className={`${styles.video_user} ${callAccepted ? styles.small : styles.large}`}
             ref={userVideoRef}
             autoPlay
             muted

@@ -1,10 +1,10 @@
 import styles from '../styles/UserIsBusy.module.css';
 import { IoClose } from "react-icons/io5";
 
-const UserIsBusy = ({handleClose}) => {
+const UserIsBusy = ({ handleClose }) => {
     return (
         <div className={styles.general}>
-            <div className={styles.icon}> {/* Contenedor para el icono */}
+            <div className={styles.icon}>
                 <IoClose onClick={handleClose} className={styles.closeIcon} />
             </div>
             <div className={styles.text}>
