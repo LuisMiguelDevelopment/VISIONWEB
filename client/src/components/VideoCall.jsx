@@ -9,6 +9,7 @@ import { BsCameraVideoOff } from "react-icons/bs";
 import { PiMicrophoneLight } from "react-icons/pi";
 import { PiMicrophoneSlash } from "react-icons/pi";
 import ModalCall from "./modaCall";
+import UserIsBusy from "./UserIsBusy";
 import alarmaAudio from "../../public/alarma.mp3";
 import { IoCloseOutline } from "react-icons/io5";
 
@@ -25,7 +26,8 @@ const VideoCall = () => {
     setCallReceived,
     handleDisconnect,
     userName,
-    userNameCall
+    userNameCall,
+    userIsBusy
   } = useCall();
 
   const [isMuted, setIsMuted] = useState(false);
@@ -39,6 +41,7 @@ const VideoCall = () => {
   const peerRef = useRef(null);
   const { user } = useAuth();
   const [callEnd, setCallEnd] = useState(false);
+  const [ callIsBusyClose , setCallIsBusyClose ] = useState(false);
 
   const handleCallAccept = () => {
     const peer = new Peer({ initiator: false, trickle: false, stream: stream });
@@ -194,27 +197,36 @@ const VideoCall = () => {
 
   /* DISCONECT */
 
+
+  const handleCloseIsBusy = () =>{
+    setCallIsBusyClose(!callIsBusyClose)
+    console.log('se cierra')
+  }
+
+
+
+
   return (
     <div className={styles.general}>
+      {userIsBusy && callIsBusyClose &&
+        <UserIsBusy handleClose={handleCloseIsBusy} />
+      }
       <div className={styles.container_videos}>
         <div
-          className={`${styles.border_video} ${
-            callActive ? "" : styles.hidden
-          }`}
+          className={`${styles.border_video} ${callActive ? "" : styles.hidden
+            }`}
         >
           {!callEnd && (
             <video className={styles.video} ref={callerVideoRef} autoPlay />
           )}
         </div>
         <div
-          className={`${styles.border_video}  ${
-            callEnd ? styles.callEndUser : ""
-          } ${callAccepted ? styles.border_video2 : ""}`}
+          className={`${styles.border_video}  ${callEnd ? styles.callEndUser : ""
+            } ${callAccepted ? styles.border_video2 : ""}`}
         >
           <video
-            className={`${styles.video_user} ${
-              callAccepted ? styles.small : styles.large
-            }`}
+            className={`${styles.video_user} ${callAccepted ? styles.small : styles.large
+              }`}
             ref={userVideoRef}
             autoPlay
             muted

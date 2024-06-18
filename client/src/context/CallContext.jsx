@@ -29,6 +29,7 @@ export const CallProvider = ({ children }) => {
   const userVideoRef = useRef(null);
   const [callerStream, setCallerStream] = useState(null);
   const [stream, setStream] = useState();
+  const [userIsBusy , setUserIsBusy] = useState(false);
 
 
 
@@ -129,6 +130,43 @@ export const CallProvider = ({ children }) => {
       socket.emit("hangupCall", { from: tocall, to: caller });
     }
   };
+  
+
+  useEffect(()=>{
+
+    socket.on("callFailed",(data)=>{
+      console.log(data);
+      setUserIsBusy(true);
+    })
+  })
+
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = ""; // For some older browsers
+
+      // Show confirmation dialog
+      const confirmationMessage = "¿Estás seguro que quieres salir y terminar la llamada?";
+      event.returnValue = confirmationMessage; // Standard-compliant browsers
+      return confirmationMessage; // Old IE
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+
+      if (myPeer) {
+        myPeer.destroy();
+        setMyPeer(null);
+        socket.emit("hangupCall", { from: tocall, to: caller });
+      }
+    
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
 
   return (
     // En CallProvider
@@ -150,7 +188,8 @@ export const CallProvider = ({ children }) => {
         userVideoRef,
         handleDisconnect,
         userName,
-        userNameCall
+        userNameCall,
+        userIsBusy
       }}
     >
       {children}
