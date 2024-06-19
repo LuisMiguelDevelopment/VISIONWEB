@@ -46,6 +46,7 @@ export const FriendProvider = ({ children }) => {
     try {
       const res = await getMyFriends();
       setFriendList(res.data.friendList);
+      console.log(res.data.friendList);
       setLoading(false);
     } catch (error) {
       setError(error);

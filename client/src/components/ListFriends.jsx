@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/ListFriend.module.css";
-import Image from "next/image";
-import pruebaimg from "../../public/Rectangle13.png";
 import { PiVideoCameraFill } from "react-icons/pi";
 import io from "socket.io-client";
 import { useFriend } from "../context/friendContext";
@@ -9,17 +7,17 @@ import { useAuth } from "../context/authContext";
 import Cookies from "js-cookie";
 import { useCall } from "../context/CallContext";
 
+
 const ListFriends = () => {
   const { friendList } = useFriend();
-  const { user, profile } = useAuth();
+  const { user, profile, getImageUrl } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
   const [socket, setSocket] = useState(null);
-  const { calls, handleCall } = useCall();
+  const { handleCall } = useCall();
 
   useEffect(() => {
-    // Verificar que user no sea null antes de acceder a sus propiedades
     if (profile) {
       console.log(profile.NameUser);
     }
@@ -31,9 +29,9 @@ const ListFriends = () => {
     const connectToSocket = async () => {
       if (userId && token) {
         const newSocket = io("http://localhost:3001", {
-          query: { userId, token }, // Corregir el nombre del parámetro a 'userId' en lugar de 'UserId'
+          query: { userId, token },
         });
-        setSocket(newSocket); // Asigna el socket al estado
+        setSocket(newSocket);
         newSocket.on("reconnect_attempt", () => {
           newSocket.emit("userLoggedIn");
           console.log("Intento de reconexión");
@@ -52,7 +50,6 @@ const ListFriends = () => {
   }, [userId, token, user]);
 
   useEffect(() => {
-    // Realizar la conexión automática al socket cuando el token está disponible
     const autoConnect = async () => {
       const tokenValue = Cookies.get("token");
       if (tokenValue && user) {
@@ -72,7 +69,6 @@ const ListFriends = () => {
 
   /**********************  CLICK PARA LLAMAR A UN AMIGO *********************/
   const handleCallClick = (friendUserId, friendName, friend) => {
-   
     if (socket) {
       handleCall({
         userToCall: friendUserId,
@@ -90,23 +86,27 @@ const ListFriends = () => {
   return (
     <>
       {friendList.map((friend, index) => {
+        const profilePictureUrl = friend.ProfilePicture 
+          ? getImageUrl(friend.ProfilePicture)
+          : '/profile.webp'; // Path to the default image
+
         return (
           <div key={index} className={styles.container_friend}>
             <div className={styles.info_friend}>
-              <Image className={styles.image_profile} src={pruebaimg} />
+              <img 
+                className={styles.image_profile} 
+                src={profilePictureUrl} 
+                alt={`${friend.NameUser}'s profile picture`}
+              />
               <span className={styles.span}>{friend.NameUser}</span>
             </div>
             <div className={styles.options}>
               <PiVideoCameraFill
                 className={styles.camera}
-                onClick={() =>
-                  handleCallClick(friend.UserId, friend.NameUser, friend)
-                }
+                onClick={() => handleCallClick(friend.UserId, friend.NameUser, friend)}
               />
               <div
-                className={`${styles.indicator} ${
-                  isFriendOnline(friend.UserId) ? styles.online : styles.offline
-                }`}
+                className={`${styles.indicator} ${isFriendOnline(friend.UserId) ? styles.online : styles.offline}`}
               ></div>
             </div>
           </div>

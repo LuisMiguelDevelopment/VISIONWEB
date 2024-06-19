@@ -12,7 +12,7 @@ export const ListFriends = async (req, res) => {
     request.input("userId", userId);
 
     const friendList = await request.query(
-      `SELECT u.UserId, u.NameUser, u.LastName
+      `SELECT u.UserId, u.NameUser, u.LastName, u.ProfilePicture
       FROM Users u
       JOIN FriendsList fl ON (u.UserId = fl.UserId1 OR u.UserId = fl.UserId2)
       WHERE u.UserId != @userId AND (fl.UserId1 = @userId OR fl.UserId2 = @userId)`
