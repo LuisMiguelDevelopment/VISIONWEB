@@ -149,19 +149,19 @@ const ProfileEditModal = ({ closeModal }) => {
                     <div className={styles.data_container}>
                         <div className={styles.text_group}>
                             <span className={styles.span}>Nombre:</span>
-                            <p>{profile ? profile.NameUser : ''}</p>
+                            <p  className={styles.p}>{profile ? profile.NameUser : ''}</p>
                         </div>
                         <div className={styles.text_group}>
                             <span className={styles.span}>Apellido:</span>
-                            <p> {profile ? profile.LastName : ''}</p>
+                            <p  className={styles.p}> {profile ? profile.LastName : ''}</p>
                         </div>
                         <div className={styles.text_group}>
                             <span className={styles.span}>Email:</span>
-                            <p> {profile ? profile.Email : ''}</p>
+                            <p className={styles.p}> {profile ? profile.Email : ''}</p>
                         </div>
                         <div className={styles.text_group}>
                             <span className={styles.span}>Fecha de nacimiento:</span>
-                            <p> {profile ? profile.DateBirth : ''}</p>
+                            <p  className={styles.p}> {profile ? profile.DateBirth : ''}</p>
                         </div>
 
                         <button onClick={handleEditClick} className={styles.editButton}>
