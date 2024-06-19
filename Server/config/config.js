@@ -1,5 +1,8 @@
 import { config } from "dotenv";
 import nodemailer  from 'nodemailer'
+import multer from 'multer'
+
+
 config();
 
 export const PORT = process.env.PORT; 
@@ -27,3 +30,15 @@ export const transporter = nodemailer.createTransport({
         pass:USER_PASS
     }
 })
+
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function(req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+export const upload = multer({ storage: storage });

@@ -1,7 +1,7 @@
 import { poolBody } from "../config/db.js";
 import { createTokenAccess, createRandomString } from "../lib/jwt.js";
 import { transporter } from "../config/config.js";
-
+import { upload } from "../config/config.js";
 import { io } from "../index.js";
 // Función para escapar caracteres especiales en una cadena SQL
 const escapeString = (value) => {
@@ -247,7 +247,7 @@ export const getUserProfile = async (req, res) => {
     const request = connection.request();
     request.input("UserId", UserId);
     const result = await request.query(
-      "SELECT NameUser , Email , UserId  , DateBirth FROM Users WHERE UserId = @UserId"
+      "SELECT NameUser, LastName, Email, UserId, DateBirth, ProfilePicture FROM Users WHERE UserId = @UserId"
     );
 
     // Verifica si se encontró un usuario con el ID proporcionado
@@ -255,14 +255,88 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Si se encuentra el usuario, devuelve sus detalles en la respuesta
+    // Si se encuentra el usuario, formatea la fecha de nacimiento antes de devolverla
     const userProfile = result.recordset[0];
+    userProfile.DateBirth = formatDate(userProfile.DateBirth); // Llama a la función formatDate
 
+    // Emitir evento utilizando socket.io
     io.emit("userConnected", { UserId: UserId });
 
     return res.status(200).json(userProfile);
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return res.status(500).json({ message: "Error fetching user profile" });
+  }
+};
+
+// Función para formatear la fecha
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  let day = date.getDate();
+
+  // Ajusta el formato para asegurar que siempre tenga dos dígitos
+  if (month < 10) {
+    month = `0${month}`;
+  }
+  if (day < 10) {
+    day = `0${day}`;
+  }
+
+  return `${year}-${month}-${day}`;
+}
+
+
+
+
+export const updateUserProfile = async (req, res) => {
+  const { NameUser, LastName, Email, DateBirth } = req.body;
+  const { UserId } = req.user;
+
+  try {
+    // Verificar que los campos requeridos no sean undefined
+    if (!NameUser || !LastName || !Email || !DateBirth) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Manejar la subida de la imagen de perfil si se proporciona
+    let profilePicturePath = null;
+    if (req.file) {
+      profilePicturePath = req.file.path.replace(/\\/g, '/'); // Replace backslashes with forward slashes
+    }
+
+    const connection = await poolBody.connect();
+    const request = connection.request();
+
+    // Configurar los parámetros de entrada escapando caracteres especiales
+    request.input("UserId", UserId);
+    request.input("NameUser", escapeString(NameUser));
+    request.input("LastName", escapeString(LastName));
+    request.input("Email", escapeString(Email));
+    request.input("DateBirth", escapeString(DateBirth));
+    if (profilePicturePath) {
+      request.input("profilePicture", escapeString(profilePicturePath));
+    }
+
+    // Construir la consulta SQL
+    let query = `
+      UPDATE Users
+      SET NameUser = @NameUser, LastName = @LastName, Email = @Email, DateBirth = @DateBirth
+    `;
+    if (profilePicturePath) {
+      query += ", profilePicture = @profilePicture";
+    }
+    query += " WHERE UserId = @UserId";
+
+    // Ejecutar la consulta SQL de forma parametrizada
+    await request.query(query);
+
+    await connection.close();
+
+    return res.status(200).json({ message: "User profile updated successfully" });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return res.status(500).json({ message: "Error updating user profile" });
   }
 };

@@ -10,4 +10,7 @@ export const recoveryPasswordRequest = request => axios.post(`/recovery-password
 
 export const updatePasswordRequest = ({ token, newPassword }) => axios.put(`/reset-password`, { token, newPassword });
 
+export const updateProfileRequest = (formdata) => axios.put(`/update-profile`,formdata)
+
 export const searchUsers = (name) => axios.get('/search', {params:{name}})
+

@@ -6,6 +6,7 @@ import {
   registerRequest,
   updatePasswordRequest,
   searchUsers,
+  updateProfileRequest
 } from "../pages/api/users";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
@@ -15,7 +16,7 @@ export const AuthContext = createContext();
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within on AuthProvider");
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -27,6 +28,7 @@ export const AuthProvider = ({ children }) => {
   const [errors, setErrors] = useState([]);
   const [profile, setProfile] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const [image, setImage] = useState('');
   const router = useRouter();
 
   const signin = async (user) => {
@@ -43,6 +45,7 @@ export const AuthProvider = ({ children }) => {
       setErrors([error.response.data.message]);
     }
   };
+
   const login = async (user) => {
     try {
       const res = await registerRequest(user);
@@ -57,6 +60,7 @@ export const AuthProvider = ({ children }) => {
       setErrors([error.response.data.message]);
     }
   };
+
   const recovery = async (request) => {
     try {
       const res = await recoveryPasswordRequest(request);
@@ -75,12 +79,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     router.push("/login");
-  //   }
-  // });
-
   const search = async (name) => {
     try {
       const res = await searchUsers(name);
@@ -92,17 +90,35 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const profile = async () => {
+    const fetchProfile = async () => {
       try {
         const res = await profileRequest();
         setProfile(res.data);
+        setImage(res.data.ProfilePicture)
         console.log(res.data);
       } catch (error) {
         console.log(error);
       }
     };
-    profile();
+    fetchProfile();
   }, []);
+
+  const updateProfile = async (formData) => {
+    try {
+      const res = await updateProfileRequest(formData);
+      console.log(res.data); // Manejar la respuesta según sea necesario
+      // Actualizar los datos de perfil después de la actualización
+      const updatedProfile = await profileRequest();
+      setProfile(updatedProfile.data);
+    } catch (error) {
+      console.log(error);
+      // Manejar errores según sea necesario
+    }
+  };
+
+  const getImageUrl = (profilePicture) => {
+    return `http://localhost:3001/${profilePicture}`;
+  };
 
   const authenticateUser = async () => {
     const token = Cookies.get("token");
@@ -139,6 +155,8 @@ export const AuthProvider = ({ children }) => {
         searchResults,
         setSearchResults,
         search,
+        updateProfile,
+        getImageUrl
       }}
     >
       {children}

@@ -4,6 +4,7 @@ import Search from "./Search";
 import ListFriends from "./ListFriends";
 import { FaBars } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
+import Profile_Slider from "./Profile";
 
 const Slider = ({ children, handleCall }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,10 +29,14 @@ const Slider = ({ children, handleCall }) => {
         <div className={styles.list_friends}>
           <ListFriends handleCall={handleCall} />
         </div>
+       
         <div className={styles.buttons}>
           <button  onClick={toggleMenu} className={`${styles.button_close} ${styles.button} `}>
             <IoClose />
           </button>
+        </div>
+        <div className={styles.profile}>
+          <Profile_Slider />
         </div>
       </div>
     </div>
