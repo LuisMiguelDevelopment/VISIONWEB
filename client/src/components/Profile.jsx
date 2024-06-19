@@ -28,7 +28,7 @@ const Profile_Slider = () => {
             <div className={styles.info_friend}>
                 <img 
                     className={styles.image_profile} 
-                    src={ProfilePicture ? getImageUrl(ProfilePicture) : '/defaultProfilePic.png'} 
+                    src={ProfilePicture ? getImageUrl(ProfilePicture) : '/profile.webp'} 
                     alt={`${NameUser} ${LastName}`} 
                     width={100} 
                     height={100} 

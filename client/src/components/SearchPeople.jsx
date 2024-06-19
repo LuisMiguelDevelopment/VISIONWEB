@@ -1,18 +1,16 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import styles from "../styles/SearchPeople.module.css";
 import Search from "./Search";
 import { IoPeople } from "react-icons/io5";
-import { useAuth } from "@/context/authContext";
-import { useFriend } from "@/context/friendContext";
-import Image from "next/image";
-import pruebaimg from "../../public/Rectangle13.png";
+import { useAuth } from "../context/authContext";
+import { useFriend } from "../context/friendContext";
 import ModalRequest from "./ModalRequest";
 import { IoIosSend } from "react-icons/io";
 
 const SearchPeople = () => {
-  const { search, searchResults } = useAuth();
-  const [query, setQuery] = useState("");
+  const { search, searchResults, getImageUrl } = useAuth();
   const { sendFriendRequest } = useFriend();
+  const [query, setQuery] = useState("");
   const [modalRequest, setModalRequest] = useState(false);
 
   const handleSearch = (value) => {
@@ -22,6 +20,14 @@ const SearchPeople = () => {
 
   const handleToggleModal = () => {
     setModalRequest(!modalRequest);
+  };
+
+  const getProfilePictureUrl = (friend) => {
+    if (friend.ProfilePicture) {
+      return getImageUrl(friend.ProfilePicture);
+    } else {
+      return '/profile.webp'; 
+    }
   };
 
   return (
@@ -36,27 +42,34 @@ const SearchPeople = () => {
           />
           {query && (
             <div className={styles.results}>
-              <ul className={styles.ul}>
-                {searchResults.map((person) => (
-                  <div className={styles.list_users}>
-                    <div className={styles.info_users}>
-                      <Image className={styles.image_profile} src={pruebaimg} />
-                      <li className={styles.li} key={person.UserId}>
-                        {person.NameUser}
-                        {" " + person.LastName} {person.UserId}
-                      </li>
+              <>
+                <ul className={styles.ul}>
+                  {searchResults.map((person) => (
+                    <div className={styles.list_users} key={person.UserId}>
+                      <div className={styles.info_users}>
+                        <img
+                          className={styles.image_profile}
+                          src={getProfilePictureUrl(person)}
+                          alt={`${person.NameUser} ${person.LastName}`}
+                          width={100}
+                          height={100}
+                        />
+                        <li className={styles.li} key={person.UserId}>
+                          {person.NameUser} {person.LastName} {person.UserId}
+                        </li>
+                      </div>
+                      <div className={styles.button_send}>
+                        <button
+                          className={styles.requestButton}
+                          onClick={() => sendFriendRequest(person.UserId)}
+                        >
+                          <IoIosSend />
+                        </button>
+                      </div>
                     </div>
-                    <div className={styles.button_send}>
-                      <button
-                        className={styles.requestButton}
-                        onClick={() => sendFriendRequest(person.UserId)}
-                      >
-                        <IoIosSend />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </ul>
+                  ))}
+                </ul>
+              </>
             </div>
           )}
         </div>
