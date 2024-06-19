@@ -22,6 +22,7 @@ const ListFriends = () => {
       console.log(profile.NameUser);
     }
   }, [user]);
+  
 
   /**********************  USUARIO ONLINE *********************/
 
@@ -45,7 +46,7 @@ const ListFriends = () => {
         };
       }
     };
-
+  
     connectToSocket();
   }, [userId, token, user]);
 

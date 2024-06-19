@@ -52,6 +52,22 @@ const VideoCall = () => {
   const { user } = useAuth();
   const [callEnd, setCallEnd] = useState(false);
 
+
+
+  useEffect(() => {
+    // Obtener acceso al flujo de vídeo del usuario
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+       
+        userVideoRef.current.srcObject = stream;
+        console.log("Tipo de stream:", typeof stream);
+      })
+      .catch((error) => {
+        console.error("Error accessing user media:", error);
+      });
+  }, []);
+
   const handleCallAccept = () => {
     const peer = new Peer({ initiator: false, trickle: false, stream: stream });
 

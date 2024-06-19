@@ -9,9 +9,6 @@ const Profile_Slider = () => {
     const { profile, getImageUrl } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    if (!profile) {
-        return <div>Loading...</div>;
-    }
 
     const { NameUser, LastName, ProfilePicture } = profile;
 
