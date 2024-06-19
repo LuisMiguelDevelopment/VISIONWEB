@@ -1,0 +1,137 @@
+/* ModalEditProfile.module.css */
+
+.general {
+    z-index: 100;
+    background-color: white;
+    width: 350px;
+    height: 400px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    box-shadow: 3px 3px 3px 3px rgb(95, 95, 95);
+    border-radius: 15px;
+}
+
+.img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.header_modal {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.body {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.editContainer {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.editButtons {
+   display: flex;
+}
+.editButton {
+    border-radius: 30px;
+    border: none;
+    color: white;
+    margin: 2px;
+    background-color: #1CD793; 
+    padding: 3px 10px;
+}
+
+.editInput {
+    /* Estilos para el input en modo de edición */
+    padding: 5px;
+    margin: 5px;
+    width: 80%;
+    max-width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.imagePreview {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.imagePreview img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.span {
+    color: #74acf0;
+}
+
+.text_group {
+    margin: 10px;
+}
+
+
+.fileInput_img{
+    display: none;
+}
+
+
+.imageContainer{
+    position: relative;
+}
+
+
+
+
+.editText{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50% , -50%);
+    opacity: 0;
+    color: rgb(255, 255, 255);
+}
+
+
+.imageContainer:hover>.editText{
+    opacity: 1;
+}
+
+.button{
+    border-radius: 15px;
+    border: none;
+    height: 20px;
+    width: auto;
+    padding: 13px;
+    display: flex;
+    align-items: center;
+    color: white;
+    margin: 5px;
+}
+
+.save_button{
+    background-color: #1CD793; 
+}
+
+.save_cancel{
+    background-color: #C6082E;
+}

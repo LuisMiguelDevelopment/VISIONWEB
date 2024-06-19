@@ -45,6 +45,8 @@ export { io, userSockets }; // Exportamos io y userSockets para poder usarlos en
 app.use("/api", userRoutes);
 app.use("/api", friendRoutes);
 
+app.use('/uploads', express.static('uploads'));
+
 connectionDB();
 
 userConnection(io);

@@ -12,6 +12,7 @@ import ModalCall from "./modaCall";
 import UserIsBusy from "./UserIsBusy";
 import alarmaAudio from "../../public/alarma.mp3";
 import { IoCloseOutline } from "react-icons/io5";
+import Profile from "./Profile";
 
 const VideoCall = () => {
   const {
@@ -200,6 +201,7 @@ const VideoCall = () => {
       {userIsBusy && !callIsBusyClose && (
         <UserIsBusy handleClose={handleCloseIsBusy} />
       )}
+        <Profile/>
       <div className={styles.container_videos}>
         <div
           className={`${styles.border_video} ${callActive ? "" : styles.hidden}`}
