@@ -22,7 +22,7 @@ export const FriendProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuth();
-
+  
   useEffect(() => {
     if (user) {
       const userId = user.UserId;

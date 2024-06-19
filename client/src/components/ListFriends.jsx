@@ -75,6 +75,8 @@ const ListFriends = () => {
         from: userId,
         name: profile.NameUser,
         nameCall: friend.NameUser,
+        profileImage: profile.ProfilePicture, 
+        profileImageFriend: friend.ProfilePicture, 
       });
     } else {
       console.error("Socket is not available");
@@ -103,7 +105,7 @@ const ListFriends = () => {
             <div className={styles.options}>
               <PiVideoCameraFill
                 className={styles.camera}
-                onClick={() => handleCallClick(friend.UserId, friend.NameUser, friend)}
+                onClick={() => handleCallClick(friend.UserId, friend.NameUser, friend, friend.ProfilePicture )}
               />
               <div
                 className={`${styles.indicator} ${isFriendOnline(friend.UserId) ? styles.online : styles.offline}`}

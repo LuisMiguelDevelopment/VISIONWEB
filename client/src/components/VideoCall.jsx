@@ -13,6 +13,7 @@ import UserIsBusy from "./UserIsBusy";
 import alarmaAudio from "../../public/alarma.mp3";
 import { IoCloseOutline } from "react-icons/io5";
 import Profile from "./Profile_edit";
+import { useFriend } from "@/context/friendContext";
 
 const VideoCall = () => {
   const {
@@ -31,8 +32,13 @@ const VideoCall = () => {
     userIsBusy,
     setUserIsBusy,
     handleCloseIsBusy,
-    callIsBusyClose
+    callIsBusyClose,
+    image,
+    imageFriend // Asegúrate de que `image` esté siendo recibido correctamente
   } = useCall();
+
+
+  const { friendList } = useFriend();
 
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
@@ -45,7 +51,6 @@ const VideoCall = () => {
   const peerRef = useRef(null);
   const { user } = useAuth();
   const [callEnd, setCallEnd] = useState(false);
-
 
   const handleCallAccept = () => {
     const peer = new Peer({ initiator: false, trickle: false, stream: stream });
@@ -193,15 +198,12 @@ const VideoCall = () => {
     }
   }, [callReceived, callAccepted]);
 
-
-  
-
   return (
     <div className={styles.general}>
       {userIsBusy && !callIsBusyClose && (
         <UserIsBusy handleClose={handleCloseIsBusy} />
       )}
-      
+
       <div className={styles.container_videos}>
         <div
           className={`${styles.border_video} ${callActive ? "" : styles.hidden}`}
@@ -254,6 +256,8 @@ const VideoCall = () => {
             UserName={userName}
             UserCall={userNameCall}
             isReceiver={user.UserId === tocall}
+            image={image} 
+            imageFriend={imageFriend} 
           />
         )}
       </div>

@@ -30,7 +30,7 @@ export const callUser = (io) => {
 
     socket.on("callUser", async (data) => {
       console.log("Evento callUser recibido:", data);
-      const { userToCall, signal, from, name, nameCall } = data;
+      const { userToCall, signal, from, name, nameCall, profileImage, profileImageFriend } = data;
       const receiverSocketId = userSockets.get(userToCall);
     
       let connection;
@@ -110,7 +110,9 @@ export const callUser = (io) => {
             signal,
             from,
             userToCall,
-            name
+            name,
+            profileImage,
+            profileImageFriend
           });
         } else {
           console.error("Socket no encontrado para el usuario:", userToCall);
@@ -122,7 +124,8 @@ export const callUser = (io) => {
           signal,
           from,
           userToCall,
-          nameCall
+          nameCall,
+          profileImageFriend
         });
     
       } catch (error) {
