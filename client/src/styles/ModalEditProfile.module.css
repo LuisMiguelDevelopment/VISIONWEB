@@ -5,9 +5,9 @@
     background-color: white;
     width: 350px;
     height: 400px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
+    position: fixed;
+    top: 49%;
+    left: 38%;
     transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
@@ -134,4 +134,12 @@
 
 .save_cancel{
     background-color: #C6082E;
+}
+
+.close{
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.6rem;
+    cursor: pointer;
 }

@@ -290,7 +290,6 @@ function formatDate(dateString) {
 
 
 
-
 export const updateUserProfile = async (req, res) => {
   const { NameUser, LastName, Email, DateBirth } = req.body;
   const { UserId } = req.user;
