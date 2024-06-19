@@ -79,7 +79,7 @@ export const FriendProvider = ({ children }) => {
   useEffect(() => {
     socket.on("acceptSend", (data) => {
       console.log("Solicitud de amistad aceptada:", data);
-      fetchFriends();  // Actualiza la lista de amigos cuando se acepte la solicitud
+      fetchFriends();  
     });
 
     return () => {

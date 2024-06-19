@@ -6,7 +6,8 @@ import {
   registerRequest,
   updatePasswordRequest,
   searchUsers,
-  updateProfileRequest
+  updateProfileRequest,
+  logoutRequest
 } from "../pages/api/users";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
@@ -30,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   const [image, setImage] = useState('');
   const router = useRouter();
 
-  // Función para obtener el perfil del usuario
+
   const fetchProfile = async () => {
     try {
       const res = await profileRequest();
@@ -42,14 +43,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Función para iniciar sesión
+
   const signin = async (user) => {
     try {
       const res = await loginRequest(user);
       console.log(res.data);
       setIsAuthenticated(true);
       setUser(res.data);
-      await fetchProfile(); // Llamar a fetchProfile después de establecer el usuario
+      await fetchProfile();
       router.push('/');
     } catch (error) {
       console.log(error);
@@ -61,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Función para registrar
+
   const login = async (user) => {
     try {
       const res = await registerRequest(user);
@@ -78,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Función para recuperar contraseña
+
   const recovery = async (request) => {
     try {
       const res = await recoveryPasswordRequest(request);
@@ -88,7 +89,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Función para actualizar contraseña
+
   const updatePassword = async (token, newPassword) => {
     try {
       await updatePasswordRequest({ token, newPassword });
@@ -98,7 +99,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Función para buscar usuarios
+
   const search = async (name) => {
     try {
       const res = await searchUsers(name);
@@ -109,7 +110,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Efecto para obtener el perfil del usuario al montar el componente
+
   useEffect(() => {
     const authenticateUser = async () => {
       const token = Cookies.get("token");
@@ -128,29 +129,49 @@ export const AuthProvider = ({ children }) => {
     };
 
     authenticateUser();
-    fetchProfile(); // Llamar a fetchProfile al montar el componente
+    fetchProfile();
   }, []);
 
-  // Función para actualizar el perfil del usuario
+
   const updateProfile = async (formData) => {
     try {
       const res = await updateProfileRequest(formData);
-      console.log(res.data); // Manejar la respuesta según sea necesario
-      // Actualizar los datos de perfil después de la actualización
+      console.log(res.data);
+
       const updatedProfile = await profileRequest();
       setProfile(updatedProfile.data);
     } catch (error) {
       console.log(error);
-      // Manejar errores según sea necesario
+
     }
   };
 
-  // Función para obtener la URL de la imagen de perfil
+
+
+  const logout = async () =>{
+    try{
+      await logoutRequest();
+      setIsAuthenticated(false);
+      setUser(null);
+      Cookies.remove('token');
+      console.log('logout');
+      router.push('/login');
+    }catch(error){
+      console.log(error)
+    }
+  }
+
   const getImageUrl = (profilePicture) => {
     return `http://localhost:3001/${profilePicture}`;
   };
 
-  // Valor proporcionado por el contexto de autenticación
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [!isAuthenticated, router]);
+
   const authContextValue = {
     signin,
     login,
@@ -164,10 +185,11 @@ export const AuthProvider = ({ children }) => {
     setSearchResults,
     search,
     updateProfile,
-    getImageUrl
+    getImageUrl,
+    logout
   };
 
-  // Devolver el proveedor de contexto con los valores proporcionados
+
   return (
     <AuthContext.Provider value={authContextValue}>
       {children}

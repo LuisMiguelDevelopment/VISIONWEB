@@ -6,7 +6,7 @@ import defautlImage from '../../public/profile.webp';
 import { IoClose } from "react-icons/io5";
 
 const ProfileEditModal = ({ closeModal }) => {
-    const { profile, updateProfile, getImageUrl } = useAuth();
+    const { profile, updateProfile, getImageUrl , logout} = useAuth();
     const [name, setName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -80,6 +80,11 @@ const ProfileEditModal = ({ closeModal }) => {
         }
     };
 
+
+    const handleExitClick = () =>{
+        logout();
+    }
+
     return (
         <div className={styles.general}>
             <IoClose className={styles.close} onClick={closeModal} />
@@ -148,11 +153,11 @@ const ProfileEditModal = ({ closeModal }) => {
                 ) : (
                     <div className={styles.data_container}>
                         <div className={styles.text_group}>
-                            <span className={styles.span}>Nombre:</span>
+                            <span className={styles.span}>Name:</span>
                             <p  className={styles.p}>{profile ? profile.NameUser : ''}</p>
                         </div>
                         <div className={styles.text_group}>
-                            <span className={styles.span}>Apellido:</span>
+                            <span className={styles.span}>Last Name:</span>
                             <p  className={styles.p}> {profile ? profile.LastName : ''}</p>
                         </div>
                         <div className={styles.text_group}>
@@ -160,12 +165,15 @@ const ProfileEditModal = ({ closeModal }) => {
                             <p className={styles.p}> {profile ? profile.Email : ''}</p>
                         </div>
                         <div className={styles.text_group}>
-                            <span className={styles.span}>Fecha de nacimiento:</span>
+                            <span className={styles.span}>Birth Date:</span>
                             <p  className={styles.p}> {profile ? profile.DateBirth : ''}</p>
                         </div>
 
                         <button onClick={handleEditClick} className={styles.editButton}>
-                            Editar
+                            Edit
+                        </button>
+                        <button onClick={handleExitClick} className={styles.logoutButton}>
+                            Exit
                         </button>
                     </div>
                 )}
