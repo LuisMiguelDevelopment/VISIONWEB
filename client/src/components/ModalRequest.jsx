@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import styles from "../styles/ModalRquest.module.css";
-import pruebaimg from "../../public/Rectangle13.png";
-import Image from "next/image";
-import { FaCheck } from "react-icons/fa6";
+import { FaCheck } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-import { useFriend } from "../context/friendContext"; // Ajusta la ruta según sea necesario
+import { useFriend } from "../context/friendContext";
+import { useAuth } from "../context/authContext";
 
 const ModalRequest = ({ modalRequest, setModalRequest }) => {
   const { requestList, acceptRequest, rejectRequest } = useFriend();
+  const { getImageUrl } = useAuth();
   const [pendingRequests, setPendingRequests] = useState([]);
 
   useEffect(() => {
@@ -24,6 +24,14 @@ const ModalRequest = ({ modalRequest, setModalRequest }) => {
     setModalRequest(!modalRequest);
   };
 
+  const getProfilePictureUrl = (request) => {
+    if (request.ProfilePicture) {
+      return getImageUrl(request.ProfilePicture);
+    } else {
+      return '/profile.webp'; // Ruta a la imagen predeterminada
+    }
+  };
+
   return (
     <div
       className={`${styles.modal_request} ${modalRequest && styles.open}`}
@@ -38,9 +46,9 @@ const ModalRequest = ({ modalRequest, setModalRequest }) => {
           pendingRequests.map((request) => (
             <div key={request.FriendRequestId} className={styles.info_friend}>
               <div className={styles.info_request}>
-                <Image
+                <img
                   className={styles.image_profile}
-                  src={pruebaimg}
+                  src={getProfilePictureUrl(request)} // Aquí se pasa 'request' como argumento
                   alt="Profile"
                   width={50}
                   height={50}

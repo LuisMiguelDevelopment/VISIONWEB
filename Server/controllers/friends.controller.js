@@ -94,6 +94,7 @@ export const getFriendRequest = async (req, res) => {
     request.input("userId", userId);
     const friendRequests = await request.query(
       `SELECT u.NameUser AS RequestingUserName, u.LastName AS RequestingUserLastName, 
+              u.ProfilePicture,
               f.FriendRequestId, f.Status, f.RequestingUserId, f.RequestedUserId
        FROM Friends f
        JOIN Users u ON f.RequestingUserId = u.UserId
@@ -107,7 +108,6 @@ export const getFriendRequest = async (req, res) => {
     res.status(500).json({ message: "Error getting friend requests" });
   }
 };
-
 
 export const sendFriendRequest = async (req, res) => {
   const { requestedUserId } = req.body;

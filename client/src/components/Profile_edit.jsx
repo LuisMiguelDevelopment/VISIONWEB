@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from '../styles/ModalEditProfile.module.css';
 import Image from 'next/image';
 import { useAuth } from '@/context/authContext';
-import defautlImage from '../../public/Rectangle13.png';
+import defautlImage from '../../public/profile.webp';
 import { IoClose } from "react-icons/io5";
 
 const ProfileEditModal = ({ closeModal }) => {

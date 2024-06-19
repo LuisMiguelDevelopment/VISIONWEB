@@ -55,7 +55,7 @@ const SearchPeople = () => {
                           height={100}
                         />
                         <li className={styles.li} key={person.UserId}>
-                          {person.NameUser} {person.LastName} {person.UserId}
+                          {person.NameUser} {person.LastName} 
                         </li>
                       </div>
                       <div className={styles.button_send}>
