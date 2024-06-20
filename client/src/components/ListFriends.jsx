@@ -1,4 +1,4 @@
-import React, { useState , useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../styles/ListFriend.module.css";
 import { PiVideoCameraFill } from "react-icons/pi";
 import io from "socket.io-client";
@@ -10,7 +10,7 @@ import SearchFriends from "./SearchFriends";
 import FriendProfile from "./FriendProfile";
 
 const ListFriends = () => {
-  const { friendList, fetchFriendsProfile } = useFriend();
+  const { friendList, fetchFriendsProfile, deleteFriend } = useFriend(); // Asegúrate de incluir deleteFriend desde useFriend
   const { user, profile, getImageUrl, searchResultsFriends } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [userId, setUserId] = useState(null);
@@ -140,6 +140,7 @@ const ListFriends = () => {
               <FriendProfile
                 profileFriend={profile}
                 onClose={() => setSelectedFriendId(null)} // Función para cerrar el perfil
+                deleteFriend={() => deleteFriend(friend.UserId)} // Asegúrate de pasar deleteFriend correctamente
               />
             )}
           </div>

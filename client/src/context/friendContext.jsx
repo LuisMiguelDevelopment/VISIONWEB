@@ -5,7 +5,8 @@ import {
   getFriendProfile,
   sendFriends,
   acceptFriendRequest,
-  deleteRequestFriend
+  deleteRequestFriend,
+  deleteMyFriend // Asegúrate de importar la función deleteMyFriend desde la API
 } from "@/pages/api/friends";
 import io from 'socket.io-client';
 import { useAuth } from "./authContext";
@@ -63,7 +64,7 @@ export const FriendProvider = ({ children }) => {
   const fetchFriendsProfile = async (friendId) => {
     try {
       const res = await getFriendProfile(friendId); 
-      setProfileFriend(res.data.friendProfile); // Make sure to set `friendProfile` from the response
+      setProfileFriend(res.data.friendProfile); // Asegúrate de setear `friendProfile` desde la respuesta
     } catch (error) {
       console.log(error);
     }
@@ -139,6 +140,15 @@ export const FriendProvider = ({ children }) => {
     }
   };
 
+  const deleteFriend = async (friendId) => {
+    try {
+      await deleteMyFriend(friendId); // Asegúrate de que deleteMyFriend elimine correctamente al amigo
+      fetchFriends();
+    } catch (error) {
+      console.error("Error eliminando al amigo:", error);
+    }
+  };
+
   const friendsObject = {
     friendList,
     loading,
@@ -148,7 +158,8 @@ export const FriendProvider = ({ children }) => {
     acceptRequest,
     rejectRequest,
     fetchFriendsProfile,
-    profileFriend
+    profileFriend,
+    deleteFriend // Asegúrate de incluir deleteFriend en el objeto retornado por el proveedor
   };
 
   return (
