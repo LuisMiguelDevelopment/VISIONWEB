@@ -1,12 +1,13 @@
 import {Router} from 'express';
 
-import { getFriendRequest, sendFriendRequest  , acceptFriendRequest, ListFriends, deleteFriend, deleteRequestFriend} from '../controllers/friends.controller.js';
+import { getFriendRequest, sendFriendRequest  , acceptFriendRequest, ListFriends, deleteFriend, deleteRequestFriend, getFriendProfile} from '../controllers/friends.controller.js';
 import { requiredUser , verifyToken } from '../middlewares/user.Middleware.js';
 const router = Router();
 
 /* GET */
 router.get('/friends-request' , verifyToken, requiredUser, getFriendRequest);
 router.get('/List-friends' , verifyToken, requiredUser, ListFriends);
+router.get('/friends/:friendId/profile',verifyToken, requiredUser, getFriendProfile  )
 
 /* POST  */
 router.post('/friends/add-friends', verifyToken,requiredUser , sendFriendRequest);
