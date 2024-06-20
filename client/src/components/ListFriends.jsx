@@ -90,7 +90,7 @@ const ListFriends = () => {
 
   return (
     <>
-      <SearchFriends text="Buscar amigos..." /> {/* Pasa las props necesarias */}
+      <SearchFriends text="Search Friends..." /> {/* Pasa las props necesarias */}
       {filteredFriends.map((friend, index) => {
         const profilePictureUrl = friend.ProfilePicture
           ? getImageUrl(friend.ProfilePicture)
