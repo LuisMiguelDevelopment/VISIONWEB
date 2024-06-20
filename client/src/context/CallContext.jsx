@@ -151,18 +151,18 @@ export const CallProvider = ({ children }) => {
 
   const handleCloseIsBusy = () => {
     setCallIsBusyClose(true);
-    setUserIsBusy(false); // Reset userIsBusy when the busy modal is closed
+    setUserIsBusy(false); 
   };
 
 
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      // Mostrar mensaje de confirmación
+     
       const confirmationMessage = "¿Estás seguro que quieres salir y terminar la llamada?";
       event.preventDefault();
-      event.returnValue = confirmationMessage; // Standard-compliant browsers
-      return confirmationMessage; // Old IE
+      event.returnValue = confirmationMessage; 
+      return confirmationMessage; 
     };
   
     const handleUnload = () => {
@@ -170,7 +170,7 @@ export const CallProvider = ({ children }) => {
         myPeer.destroy();
         setMyPeer(null);
   
-        // Emitir el evento de colgar llamada
+        
         socket.emit("hangupCall", { from: tocall, to: caller });
       }
     };
@@ -188,7 +188,7 @@ export const CallProvider = ({ children }) => {
 
 
   return (
-    // En CallProvider
+   
     <CallContext.Provider
       value={{
         calls,

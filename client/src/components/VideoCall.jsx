@@ -34,7 +34,7 @@ const VideoCall = () => {
     handleCloseIsBusy,
     callIsBusyClose,
     image,
-    imageFriend // Asegúrate de que `image` esté siendo recibido correctamente
+    imageFriend 
   } = useCall();
 
 
@@ -55,7 +55,7 @@ const VideoCall = () => {
 
 
   useEffect(() => {
-    // Obtener acceso al flujo de vídeo del usuario
+    
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
@@ -123,7 +123,7 @@ const VideoCall = () => {
     setCallReceived(false);
     setShowAnswerButton(false);
     socket.emit("hangupCall", { from: caller, to: tocall });
-    setUserIsBusy(false); // Reset the userIsBusy state when call is hung up
+    setUserIsBusy(false); 
   };
 
   useEffect(() => {
@@ -131,7 +131,7 @@ const VideoCall = () => {
       setCallReceived(false);
       setShowAnswerButton(false);
       console.log("La llamada fue cancelada:", data);
-      setUserIsBusy(false); // Reset the userIsBusy state when call is cancelled
+      setUserIsBusy(false); 
     };
 
     socket.on("callCancelled", handleCallCancelled);
@@ -146,7 +146,7 @@ const VideoCall = () => {
       setCallReceived(false);
       setCallAccepted(false);
       setCallEnd(true);
-      setUserIsBusy(false); // Reset the userIsBusy state when call is cancelled
+      setUserIsBusy(false); 
     };
 
     socket.on("callCancelled", handleCallCancelled);

@@ -12,7 +12,7 @@ const ModalRequest = ({ modalRequest, setModalRequest }) => {
 
   useEffect(() => {
     if (requestList && requestList.friendRequests) {
-      // Filtra las solicitudes pendientes
+     
       const pending = requestList.friendRequests.filter(
         (request) => request.Status === "PENDING"
       );
@@ -28,7 +28,7 @@ const ModalRequest = ({ modalRequest, setModalRequest }) => {
     if (request.ProfilePicture) {
       return getImageUrl(request.ProfilePicture);
     } else {
-      return '/profile.webp'; // Ruta a la imagen predeterminada
+      return '/profile.webp'; 
     }
   };
 
@@ -48,7 +48,7 @@ const ModalRequest = ({ modalRequest, setModalRequest }) => {
               <div className={styles.info_request}>
                 <img
                   className={styles.image_profile}
-                  src={getProfilePictureUrl(request)} // Aquí se pasa 'request' como argumento
+                  src={getProfilePictureUrl(request)} 
                   alt="Profile"
                   width={50}
                   height={50}

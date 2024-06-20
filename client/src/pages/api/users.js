@@ -1,11 +1,13 @@
 import axios from './axios';
 
-export const  loginRequest = user => axios.post(`/login`,user);
-
-
-export const  logoutRequest = user => axios.post(`/logout`,user);
 
 export const profileRequest = () => axios.get(`/profile`)
+
+export const searchUsers = (name) => axios.get('/search', {params:{name}})
+
+export const  loginRequest = user => axios.post(`/login`,user);
+
+export const  logoutRequest = user => axios.post(`/logout`,user);
 
 export const  registerRequest = user => axios.post(`/register`,user);
 
@@ -15,5 +17,4 @@ export const updatePasswordRequest = ({ token, newPassword }) => axios.put(`/res
 
 export const updateProfileRequest = (formdata) => axios.put(`/update-profile`,formdata)
 
-export const searchUsers = (name) => axios.get('/search', {params:{name}})
 

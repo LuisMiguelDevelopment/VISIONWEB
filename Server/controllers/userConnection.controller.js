@@ -5,16 +5,16 @@ export const connectedUsers = {};
 const userSocketMap = new Map();
 
 export const userConnection = (io) => {
-  // Objeto para almacenar los usuarios conectados
+  // Object to store connected users
 
-  // Función para obtener los usuarios conectados desde la base de datos
+  // Function to fetch connected users from the database
   async function fetchConnectedUsers() {
     try {
       const connection = await poolBody.connect();
       const request = connection.request();
       const result = await request.query("SELECT UserId FROM ConnectedUsers");
       await connection.close();
-      // Almacena los usuarios conectados en el objeto connectedUsers
+      // Store connected users in the connectedUsers object
       result.recordset.forEach((row) => {
         connectedUsers[row.UserId] = true;
       });
@@ -23,30 +23,30 @@ export const userConnection = (io) => {
     }
   }
 
-  // Llama a la función fetchConnectedUsers para obtener los usuarios conectados al inicio
+  // Call fetchConnectedUsers function to get connected users on startup
   fetchConnectedUsers();
 
-  // Manejo de eventos cuando un cliente se conecta al servidor de sockets
+  // Handling events when a client connects to the socket server
   io.on("connection", async (socket) => {
-    const { userId } = socket.request._query; // Corregir el nombre del parámetro a 'userId'
+    const { userId } = socket.request._query; // Correct parameter name to 'userId'
     console.log("UserId:", userId);
 
     userSocketMap.set(userId, socket);
 
     try {
-      // Conexión a la base de datos para insertar/actualizar el usuario conectado
+      // Database connection to insert/update the connected user
       const connection = await poolBody.connect();
       const request = connection.request();
-      request.input("UserId", userId); // Corregir el nombre del parámetro a 'userId'
-      // Query SQL para insertar/actualizar el usuario conectado en la tabla ConnectedUsers
+      request.input("UserId", userId); // Correct parameter name to 'userId'
+      // SQL query to insert/update the connected user in the ConnectedUsers table
       await request.query(
         "MERGE INTO ConnectedUsers USING (VALUES (@UserId)) AS source (UserId) ON ConnectedUsers.UserId = source.UserId WHEN NOT MATCHED THEN INSERT (UserId) VALUES (source.UserId);"
       );
       await connection.close();
 
-      // Agrega al usuario conectado al objeto connectedUsers
+      // Add the connected user to the connectedUsers object
       connectedUsers[userId] = true;
-      // Emite la lista de usuarios conectados a todos los clientes
+      // Emit the list of connected users to all clients
       emitConnectedUsers();
     } catch (error) {
       console.error(
@@ -55,49 +55,49 @@ export const userConnection = (io) => {
       );
     }
 
-    // Manejo de evento cuando un cliente se desconecta
+    // Handling event when a client disconnects
     socket.on("disconnect", async () => {
-      console.log("Cliente desconectado");
+      console.log("Client disconnected");
       try {
-        // Conexión a la base de datos para eliminar al usuario desconectado
+        // Database connection to delete the disconnected user
         const connection = await poolBody.connect();
         const request = connection.request();
-        request.input("UserId", userId); // Corregir el nombre del parámetro a 'userId'
-        // Query SQL para eliminar al usuario desconectado de la tabla ConnectedUsers
+        request.input("UserId", userId); // Correct parameter name to 'userId'
+        // SQL query to delete the disconnected user from the ConnectedUsers table
         await request.query(
           "DELETE FROM ConnectedUsers WHERE UserId = @UserId"
         );
         await connection.close();
 
-        // Elimina al usuario desconectado del objeto connectedUsers
+        // Remove the disconnected user from the connectedUsers object
         delete connectedUsers[userId];
 
         userSocketMap.delete(userId);
-        // Emite la lista de usuarios conectados a todos los clientes
+        // Emit the list of connected users to all clients
         emitConnectedUsers();
       } catch (error) {
         console.error("Error deleting connected user from database: ", error);
       }
     });
 
-    // Manejo de evento cuando un usuario vuelve a iniciar sesión
+    // Handling event when a user logs in again
     socket.on("userLoggedIn", async () => {
-      console.log("El usuario ha iniciado sesión nuevamente");
+      console.log("User has logged in again");
       try {
-        // Conexión a la base de datos para insertar al usuario que ha iniciado sesión nuevamente
+        // Database connection to insert the user who logged in again
         const connection = await poolBody.connect();
         const request = connection.request();
-        request.input("UserId", userId); // Corregir el nombre del parámetro a 'userId'
-        // Query SQL para insertar al usuario que ha iniciado sesión nuevamente en la tabla ConnectedUsers
+        request.input("UserId", userId); // Correct parameter name to 'userId'
+        // SQL query to insert the user who logged in again into the ConnectedUsers table
         await request.query(
           "MERGE INTO ConnectedUsers USING (VALUES (@UserId)) AS source (UserId) ON ConnectedUsers.UserId = source.UserId WHEN NOT MATCHED THEN INSERT (UserId) VALUES (source.UserId);"
         );
         await connection.close();
-        console.log("Sesión guardada en la base de datos");
+        console.log("Session saved in the database");
 
         userSocketMap.set(userId, socket);
 
-        // Llama a fetchConnectedUsers después de que un usuario vuelva a iniciar sesión
+        // Call fetchConnectedUsers after a user logs in again
         fetchConnectedUsers();
       } catch (error) {
         console.error("Error saving user session to database: ", error);
@@ -106,10 +106,10 @@ export const userConnection = (io) => {
 
   });
 
-  // Función para emitir la lista de usuarios conectados a todos los clientes
+  // Function to emit the list of connected users to all clients
   async function emitConnectedUsers() {
     const connectedUserIds = Array.from(userSocketMap.keys());
     console.log("Connected users:", Object.keys(connectedUserIds));
-    io.emit("connectedUsers", connectedUserIds); // Emitir connectedUserIds directamente sin Object.keys
+    io.emit("connectedUsers", connectedUserIds); // Emit connectedUserIds directly without Object.keys
   }
 };

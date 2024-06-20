@@ -24,7 +24,7 @@ const ListFriends = () => {
   }, [user]);
   
 
-  /**********************  USUARIO ONLINE *********************/
+  /**********************  USER ONLINE *********************/
 
   useEffect(() => {
     const connectToSocket = async () => {
@@ -61,14 +61,14 @@ const ListFriends = () => {
     autoConnect();
   }, [user]);
 
-  // Función para verificar si un amigo está en línea
+ 
   const isFriendOnline = (friendUserId) => {
     return onlineUsers.includes(String(friendUserId));
   };
 
-  /**********************  USUARIO ONLINE *********************/
+  /**********************  USER ONLINE *********************/
 
-  /**********************  CLICK PARA LLAMAR A UN AMIGO *********************/
+  /**********************  CLICK CALL YOUR FRIEND *********************/
   const handleCallClick = (friendUserId, friendName, friend) => {
     if (socket) {
       handleCall({
@@ -84,14 +84,14 @@ const ListFriends = () => {
     }
   };
 
-  /**********************  CLICK PARA LLAMAR A UN AMIGO *********************/
+  /**********************  CLICK CALL YOUR FRIEND *********************/
 
   return (
     <>
       {friendList.map((friend, index) => {
         const profilePictureUrl = friend.ProfilePicture 
           ? getImageUrl(friend.ProfilePicture)
-          : '/profile.webp'; // Path to the default image
+          : '/profile.webp';
 
         return (
           <div key={index} className={styles.container_friend}>

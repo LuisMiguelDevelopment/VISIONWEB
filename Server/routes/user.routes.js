@@ -4,7 +4,7 @@ import { getUsers,  registerUser, loginUser, logout, sendRecoveryEmail, resetPas
 import { CheckEmailExistRegister, hashPassword, hashNewPassword, comparePassword, verifyToken, requiredUser } from '../middlewares/user.Middleware.js';
 import { validateSchema } from '../middlewares/validator.middlewares.js';
 import { loginSchema } from '../schema/user.schema.js';
-import { io } from '../index.js'; // Importa io
+import { io } from '../index.js'; 
 import { upload } from '../config/config.js';
 
 const router = Router();

@@ -21,30 +21,44 @@ export const getUsers = async (req, res) => {
 
 export const searchUser = async (req, res) => {
   const { name } = req.query;
+  const userId = req.user.UserId;
 
   if (!name) {
     return res.status(400).json({ message: "Missing name parameter" });
   }
+  if (!userId) {
+    return res.status(400).json({ message: "Missing userId parameter" });
+  }
 
   try {
-    // Realiza una consulta a la base de datos para obtener los usuarios que coincidan con el nombre proporcionado
     const connection = await poolBody.connect();
     const request = connection.request();
     request.input("Name", `%${name}%`);
-    const result = await request.query(
-      "SELECT * FROM Users WHERE CONCAT(NameUser, ' ', LastName) LIKE @Name"
-    );
+    request.input("UserId", userId);
 
-    // Verifica si se encontraron usuarios que coincidan con el nombre proporcionado
+    const result = await request.query(`
+      SELECT * 
+      FROM Users 
+      WHERE CONCAT(NameUser, ' ', LastName) LIKE @Name
+      AND UserId != @UserId  -- Exclude the current user
+      AND UserId NOT IN (
+        SELECT 
+          CASE 
+            WHEN UserId1 = @UserId THEN UserId2
+            ELSE UserId1
+          END
+        FROM FriendsList
+        WHERE (UserId1 = @UserId OR UserId2 = @UserId)
+      )
+    `);
+
+    await connection.close();
+
     if (result.recordset.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No users found with the provided name" });
+      return res.status(404).json({ message: "No users found with the provided name" });
     }
 
-    // Si se encuentran usuarios, devuelve los detalles en la respuesta
     const users = result.recordset;
-
     return res.status(200).json(users);
   } catch (error) {
     console.error("Error searching users by name:", error);
@@ -55,14 +69,14 @@ export const searchUser = async (req, res) => {
 export const registerUser = async (req, res) => {
   const { NameUser, LastName, Email, PasswordKey, DateBirth } = req.body;
   try {
-    // Verificar que los campos requeridos no sean undefined
+    
     if (!NameUser || !LastName || !Email || !PasswordKey || !DateBirth) {
       return res.status(400).json({ message: "Missing required fields" });
     }
     const connection = await poolBody.connect();
     const request = connection.request();
 
-    // Configurar los parámetros de entrada escapando caracteres especiales
+    
     request.input("NameUser", escapeString(NameUser));
     request.input("LastName", escapeString(LastName));
     request.input("Email", escapeString(Email));
@@ -74,13 +88,10 @@ export const registerUser = async (req, res) => {
       "INSERT INTO Users (NameUser, LastName, Email, PasswordKey, DateBirth) VALUES (@NameUser, @LastName, @Email, @PasswordKey, @DateBirth); SELECT SCOPE_IDENTITY() AS UserId;"
     );
 
-    // Obtener el UserId generado automáticamente
     const UserId = result.recordset[0].UserId;
 
-    // Crear el token con el UserId
     const token = await createTokenAccess({ Email, UserId });
-
-    // Establecer el token en la cookie de la respuesta
+  
     res.cookie("token", token);
 
     await connection.close();
@@ -102,7 +113,6 @@ export const loginUser = async (req, res, io) => {
   try {
     const { Email } = req.body;
 
-    // Consultar la base de datos para obtener el UserId asociado al correo electrónico
     const connection = await poolBody.connect();
     const request = connection.request();
     request.input("Email", Email);
@@ -116,10 +126,8 @@ export const loginUser = async (req, res, io) => {
 
     const UserId = result.recordset[0].UserId;
 
-    // Crear el token con el Email y UserId
     const token = await createTokenAccess({ Email, UserId });
 
-    // Establecer el token en la cookie de la respuesta
     res.cookie("token", token);
 
     console.log(UserId);
@@ -238,11 +246,11 @@ export const resetPassword = async (req, res) => {
 };
 
 export const getUserProfile = async (req, res) => {
-  // Extrae el ID de usuario de los parámetros de la ruta
+ 
   const UserId = req.user.UserId;
 
   try {
-    // Realiza una consulta a la base de datos para obtener los detalles del usuario por su ID
+   
     const connection = await poolBody.connect();
     const request = connection.request();
     request.input("UserId", UserId);
@@ -250,16 +258,16 @@ export const getUserProfile = async (req, res) => {
       "SELECT NameUser, LastName, Email, UserId, DateBirth, ProfilePicture FROM Users WHERE UserId = @UserId"
     );
 
-    // Verifica si se encontró un usuario con el ID proporcionado
+    
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Si se encuentra el usuario, formatea la fecha de nacimiento antes de devolverla
+   
     const userProfile = result.recordset[0];
-    userProfile.DateBirth = formatDate(userProfile.DateBirth); // Llama a la función formatDate
+    userProfile.DateBirth = formatDate(userProfile.DateBirth); 
 
-    // Emitir evento utilizando socket.io
+    
     io.emit("userConnected", { UserId: UserId });
 
     return res.status(200).json(userProfile);
@@ -269,14 +277,14 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-// Función para formatear la fecha
+
 function formatDate(dateString) {
   const date = new Date(dateString);
   const year = date.getFullYear();
   let month = date.getMonth() + 1;
   let day = date.getDate();
 
-  // Ajusta el formato para asegurar que siempre tenga dos dígitos
+  
   if (month < 10) {
     month = `0${month}`;
   }
@@ -287,29 +295,26 @@ function formatDate(dateString) {
   return `${year}-${month}-${day}`;
 }
 
-
-
-
 export const updateUserProfile = async (req, res) => {
   const { NameUser, LastName, Email, DateBirth } = req.body;
   const { UserId } = req.user;
 
   try {
-    // Verificar que los campos requeridos no sean undefined
+    
     if (!NameUser || !LastName || !Email || !DateBirth) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Manejar la subida de la imagen de perfil si se proporciona
+    
     let profilePicturePath = null;
     if (req.file) {
-      profilePicturePath = req.file.path.replace(/\\/g, '/'); // Replace backslashes with forward slashes
+      profilePicturePath = req.file.path.replace(/\\/g, "/");
     }
 
     const connection = await poolBody.connect();
     const request = connection.request();
 
-    // Configurar los parámetros de entrada escapando caracteres especiales
+    
     request.input("UserId", UserId);
     request.input("NameUser", escapeString(NameUser));
     request.input("LastName", escapeString(LastName));
@@ -319,7 +324,7 @@ export const updateUserProfile = async (req, res) => {
       request.input("profilePicture", escapeString(profilePicturePath));
     }
 
-    // Construir la consulta SQL
+    
     let query = `
       UPDATE Users
       SET NameUser = @NameUser, LastName = @LastName, Email = @Email, DateBirth = @DateBirth
@@ -329,12 +334,14 @@ export const updateUserProfile = async (req, res) => {
     }
     query += " WHERE UserId = @UserId";
 
-    // Ejecutar la consulta SQL de forma parametrizada
+    
     await request.query(query);
 
     await connection.close();
 
-    return res.status(200).json({ message: "User profile updated successfully" });
+    return res
+      .status(200)
+      .json({ message: "User profile updated successfully" });
   } catch (error) {
     console.error("Error updating user profile:", error);
     return res.status(500).json({ message: "Error updating user profile" });
