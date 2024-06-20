@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }) => {
       console.log(res.data);
       setIsAuthenticated(true);
       setUser(res.data);
+      await fetchProfile();
     } catch (error) {
       console.log(error);
       if (Array.isArray(error.response.data)) {
@@ -176,6 +177,17 @@ export const AuthProvider = ({ children }) => {
   const getImageUrl = (profilePicture) => {
     return `http://localhost:3001/${profilePicture}`;
   };
+
+
+
+  useEffect(()=>{
+    if(errors.length> 0){
+        const timer = setTimeout(()=>{
+            setErrors([]);
+        },5000)
+        return ()=> clearTimeout(timer)
+    }
+},[errors])
 
 
   
