@@ -36,7 +36,6 @@ const Input = ({ type, placeholder, register, icon, showPassword, handlePassword
           )}
         </>
       )}
-      {/* Mostrar el mensaje de error si existe */}
       {error && (
         <p className={styles.error_message}>{error.message}</p>
       )}

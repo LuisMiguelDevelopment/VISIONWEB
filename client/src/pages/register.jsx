@@ -4,7 +4,7 @@ import { useAuth } from "../context/authContext";
 import { useRouter } from "next/router";
 import styles from "../styles/Register.module.css";
 import NavForm from "../components/NavForm";
-import Input from "../components/Input"; 
+import Input from "../components/Input";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,13 +29,10 @@ const Register = () => {
 
   const onSubmited = async (data) => {
     try {
-      await login(data); // Intenta iniciar sesión con los datos del formulario
-      // Si el login tiene éxito, el usuario será redirigido automáticamente
+      await login(data);
     } catch (error) {
-      console.error("Login error:", error); // Loguea el error en la consola para depuración
-      // Muestra el mensaje de error al usuario, por ejemplo, usando un estado local
-      // Opcionalmente podrías definir un estado local para almacenar el error
-      // Y mostrarlo en el formulario
+      console.error("Login error:", error);
+
     }
   };
 

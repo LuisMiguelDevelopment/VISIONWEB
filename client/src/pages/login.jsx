@@ -15,7 +15,7 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-    setError,  // Agregar setError para manejar errores manualmente
+    setError,
   } = useForm();
 
   const { signin, isAuthenticated } = useAuth();
@@ -34,32 +34,32 @@ const Login = () => {
   const onSubmited = async (data) => {
     try {
       if (data.PasswordKey.length < 6) {
-        // Si la contraseña es menor a 6 caracteres, mostramos un error
+
         setError("PasswordKey", {
           type: "manual",
           message: "Password must be at least 6 characters long",
         });
-        return; // Detenemos el envío del formulario
+        return;
       }
 
-      await signin(data); // Intenta iniciar sesión con los datos del formulario
-      // Si el inicio de sesión tiene éxito, el usuario será redirigido automáticamente
+      await signin(data);
+
     } catch (error) {
-      console.error("Login error:", error); // Loguea el error en la consola para depuración
+      console.error("Login error:", error);
 
       if (error.response && error.response.data) {
         const serverErrors = error.response.data;
 
-        // Mostrar errores específicos en el formulario
+
         serverErrors.forEach((errorMessage) => {
           switch (errorMessage) {
             case "Invalid credentials":
-              // Mostrar el error de credenciales inválidas
+
               setError("Email", { message: "Invalid email or password" });
               setError("PasswordKey", { message: "Invalid email or password" });
               break;
             default:
-              // Otros errores que puedas querer manejar
+
               break;
           }
         });
