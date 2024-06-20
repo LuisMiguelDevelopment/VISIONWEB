@@ -1,25 +1,27 @@
-// Search.jsx
-
 import { useState } from "react";
 import styles from "../styles/SearchFriends.module.css";
 import { IoMdSearch } from "react-icons/io";
-import { useAuth } from "../context/authContext"; // Importa el contexto de autenticación
+import { useAuth } from "../context/authContext";
 
 const SearchFriends = ({ text, additionalClass, inputClass }) => {
-  const { searchFriends } = useAuth(); // Obtiene la función searchFriends del contexto de autenticación
+  const { searchFriends } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (e) => {
     const value = e.target.value;
-    setSearchTerm(value); // Actualiza el estado local con el término de búsqueda
-    searchFriends(value); // Llama a la función searchFriends del contexto con el término de búsqueda
+    setSearchTerm(value);
+    if (value === "") {
+      searchFriends(null);
+    } else {
+      searchFriends(value);
+    }
   };
+
 
   return (
     <div
-      className={`${styles.container_search} ${
-        additionalClass ? additionalClass : ""
-      }`}
+      className={`${styles.container_search} ${additionalClass ? additionalClass : ""
+        }`}
     >
       <input
         type="text"

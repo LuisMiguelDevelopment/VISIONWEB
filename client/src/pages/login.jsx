@@ -11,14 +11,13 @@ import Input from "../components/Input";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm();
+  const { register, handleSubmit } = useForm();
+  const { signin, isAuthenticated, errors } = useAuth(); 
 
-  const { signin, isAuthenticated } = useAuth();
+  const handlePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   const router = useRouter();
 
   useEffect(() => {
@@ -27,43 +26,11 @@ const Login = () => {
     }
   }, [isAuthenticated, router]);
 
-  const handlePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const onSubmited = async (data) => {
+  const onSubmit = async (data) => {
     try {
-      if (data.PasswordKey.length < 6) {
-
-        setError("PasswordKey", {
-          type: "manual",
-          message: "Password must be at least 6 characters long",
-        });
-        return;
-      }
-
       await signin(data);
-
     } catch (error) {
-      console.error("Login error:", error);
-
-      if (error.response && error.response.data) {
-        const serverErrors = error.response.data;
-
-
-        serverErrors.forEach((errorMessage) => {
-          switch (errorMessage) {
-            case "Invalid credentials":
-
-              setError("Email", { message: "Invalid email or password" });
-              setError("PasswordKey", { message: "Invalid email or password" });
-              break;
-            default:
-
-              break;
-          }
-        });
-      }
+      console.log(error);
     }
   };
 
@@ -72,37 +39,43 @@ const Login = () => {
       <NavForm>
         <div className={styles.page_login}>
           <div className={styles.form_container}>
-            <form className={styles.form} onSubmit={handleSubmit(onSubmited)}>
+            <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
               <div className={styles.login_title}>
                 <h1 className={styles.login_h1}>L</h1>
-                <Image src={visionWeb} width={35} height={35} alt="logo vision web" />
+                <Image
+                  src={visionWeb}
+                  width={35}
+                  height={35}
+                  alt="logo vision web"
+                />
                 <h1 className={styles.login_h1}>gin</h1>
               </div>
               <div className={styles.inputs}>
                 <Input
                   type="email"
                   placeholder="Email"
-                  register={register("Email", { required: "Email is required" })}
+                  register={register("Email")}
                   icon="email"
                 />
-                {errors.Email && <p className={styles.error_message}>{errors.Email.message}</p>}
+                {errors && errors.Email && (
+                  <p className={styles.error}>{errors.Email}</p>
+                )}
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
-                  register={register("PasswordKey", {
-                    required: "Password is required",
-                    minLength: { value: 6, message: "Password must be at least 6 characters long" }
-                  })}
+                  register={register("PasswordKey")}
                   showPassword={showPassword}
                   handlePasswordVisibility={handlePasswordVisibility}
-                  icon="password"
+                  icon={'password'}
                 />
-                {errors.PasswordKey && <p className={styles.error_message}>{errors.PasswordKey.message}</p>}
+                {errors && errors.PasswordKey && (
+                  <p className={styles.error}>{errors.PasswordKey}</p>
+                )}
               </div>
               <Link href="/recoveryPassword" className={styles.p}>
                 Forgot your password?
               </Link>
-              <button className={styles.button}>Send</button>
+              <button className={styles.button}>Submit</button>
             </form>
           </div>
         </div>

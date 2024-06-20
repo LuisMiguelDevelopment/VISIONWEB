@@ -4,6 +4,7 @@
   align-items: center;
   flex-direction: column;
   height: 90vh;
+  
   position: relative;
 }
 
@@ -145,5 +146,4 @@
     width: 90vw;
     height: 100%;
   }
-  
-}
+  

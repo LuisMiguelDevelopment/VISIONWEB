@@ -56,8 +56,9 @@ export const AuthProvider = ({ children }) => {
       router.push('/');
     } catch (error) {
       console.log(error);
-      if (Array.isArray(error.response.data)) {
+      if (error.response.data) {
         setErrors(error.response.data);
+        console.log(error.response.data)
       } else {
         setErrors([error.response.data.message]);
       }
@@ -74,7 +75,8 @@ export const AuthProvider = ({ children }) => {
       await fetchProfile();
     } catch (error) {
       console.log(error);
-      if (Array.isArray(error.response.data)) {
+      if (error.response.data) {
+        console.log(error.response.data)
         setErrors(error.response.data);
       } else {
         setErrors([error.response.data.message]);

@@ -1,5 +1,3 @@
-// ListFriends.jsx
-
 import React, { useEffect, useState } from "react";
 import styles from "../styles/ListFriend.module.css";
 import { PiVideoCameraFill } from "react-icons/pi";
@@ -8,7 +6,7 @@ import { useFriend } from "../context/friendContext";
 import { useAuth } from "../context/authContext";
 import Cookies from "js-cookie";
 import { useCall } from "../context/CallContext";
-import SearchFriends from "./SearchFriends"; // Asegúrate de importar el componente Search
+import SearchFriends from "./SearchFriends"; 
 
 const ListFriends = () => {
   const { friendList } = useFriend();
@@ -61,6 +59,14 @@ const ListFriends = () => {
     autoConnect();
   }, [user]);
 
+  useEffect(() => {
+    if (searchResultsFriends && searchResultsFriends.length > 0) {
+      setFilteredFriends(searchResultsFriends);
+    } else {
+      setFilteredFriends(friendList); 
+    }
+  }, [searchResultsFriends, friendList]);
+
   const isFriendOnline = (friendUserId) => {
     return onlineUsers.includes(String(friendUserId));
   };
@@ -80,14 +86,6 @@ const ListFriends = () => {
     }
   };
 
-  useEffect(() => {
-    if (searchResultsFriends.length > 0) {
-      setFilteredFriends(searchResultsFriends);
-    } else {
-      setFilteredFriends(friendList);
-    }
-  }, [searchResultsFriends, friendList]);
-
   return (
     <>
       <SearchFriends text="Search Friends..." /> {/* Pasa las props necesarias */}
@@ -97,7 +95,6 @@ const ListFriends = () => {
           : "/profile.webp";
 
         return (
-          
           <div key={index} className={styles.container_friend}>
             <div className={styles.info_friend}>
               <img

@@ -1,6 +1,5 @@
 // components/Input.js
 import React from "react";
-import { CiUser } from "react-icons/ci";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { LuEye } from "react-icons/lu";
 import { IoMdEyeOff } from "react-icons/io";
@@ -18,9 +17,6 @@ const Input = ({ type, placeholder, register, icon, showPassword, handlePassword
       {icon === "email" && (
         <MdOutlineMailOutline className={styles.icon} />
       )}
-      {icon === "user" && (
-        <CiUser className={styles.icon} />
-      )}
       {icon === "password" && (
         <>
           {showPassword ? (
@@ -36,9 +32,7 @@ const Input = ({ type, placeholder, register, icon, showPassword, handlePassword
           )}
         </>
       )}
-      {error && (
-        <p className={styles.error_message}>{error.message}</p>
-      )}
+      
     </div>
   );
 };

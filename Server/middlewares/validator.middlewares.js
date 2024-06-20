@@ -1,11 +1,15 @@
-export const validateSchema = (schema) => (req, res, next) => {
+export const validateSchema = (schema) => async (req, res, next) => {
     try {
-        schema.parse(req.body);
+        await schema.parseAsync(req.body);
         next();
     } catch (error) {
-        return res
-            .status(400)
-            .json(error.errors.map((error) => error.message));
+        const errors = {};
+
+        error.errors.forEach((err) => {
+            const fieldName = err.path.join('.');
+            errors[fieldName] = err.message;
+        });
+
+        return res.status(400).json(errors);
     }
 };
-

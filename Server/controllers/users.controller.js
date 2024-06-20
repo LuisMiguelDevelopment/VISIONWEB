@@ -55,7 +55,9 @@ export const searchUser = async (req, res) => {
     await connection.close();
 
     if (result.recordset.length === 0) {
-      return res.status(404).json({ message: "No users found with the provided name" });
+      return res
+        .status(404)
+        .json({ message: "No users found with the provided name" });
     }
 
     const users = result.recordset;
@@ -66,40 +68,34 @@ export const searchUser = async (req, res) => {
   }
 };
 
-
-
-
 export const searchFriends = async (req, res) => {
   const { name } = req.query;
   const userId = req.user.UserId;
 
-  if (!name) {
-    return res.status(400).json({ message: "Missing name parameter" });
-  }
-  if (!userId) {
-    return res.status(400).json({ message: "Missing userId parameter" });
-  }
-
   try {
     const connection = await poolBody.connect();
     const request = connection.request();
-    request.input("Name", `%${name}%`);
+
+    if (name) {
+      request.input("Name", `%${name}%`);
+    }
+
     request.input("UserId", userId);
 
-    const result = await request.query(`
+    let query = `
       SELECT U.* 
       FROM Users U
       INNER JOIN FriendsList F ON (U.UserId = F.UserId1 OR U.UserId = F.UserId2)
       WHERE (F.UserId1 = @UserId OR F.UserId2 = @UserId)
-      AND CONCAT(U.NameUser, ' ', U.LastName) LIKE @Name
       AND U.UserId != @UserId  -- Exclude the current user
-    `);
+    `;
 
-    await connection.close();
-
-    if (result.recordset.length === 0) {
-      return res.status(404).json({ message: "No friends found with the provided name" });
+    if (name) {
+      query += ` AND CONCAT(U.NameUser, ' ', U.LastName) LIKE @Name `;
     }
+
+    const result = await request.query(query);
+    await connection.close();
 
     const friends = result.recordset;
     return res.status(200).json(friends);
@@ -108,27 +104,24 @@ export const searchFriends = async (req, res) => {
     return res.status(500).json({ message: "Error searching friends by name" });
   }
 };
-
-
-
 export const registerUser = async (req, res) => {
   const { NameUser, LastName, Email, PasswordKey, DateBirth } = req.body;
+
+  // Validar campos requeridos manualmente
+  if (!NameUser || !LastName || !Email || !PasswordKey || !DateBirth) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
   try {
-    
-    if (!NameUser || !LastName || !Email || !PasswordKey || !DateBirth) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
     const connection = await poolBody.connect();
     const request = connection.request();
 
-    
     request.input("NameUser", escapeString(NameUser));
     request.input("LastName", escapeString(LastName));
     request.input("Email", escapeString(Email));
     request.input("PasswordKey", escapeString(PasswordKey));
     request.input("DateBirth", escapeString(DateBirth));
 
-    // Ejecutar la consulta SQL de forma parametrizada
     const result = await request.query(
       "INSERT INTO Users (NameUser, LastName, Email, PasswordKey, DateBirth) VALUES (@NameUser, @LastName, @Email, @PasswordKey, @DateBirth); SELECT SCOPE_IDENTITY() AS UserId;"
     );
@@ -136,7 +129,6 @@ export const registerUser = async (req, res) => {
     const UserId = result.recordset[0].UserId;
 
     const token = await createTokenAccess({ Email, UserId });
-  
     res.cookie("token", token);
 
     await connection.close();
@@ -291,11 +283,9 @@ export const resetPassword = async (req, res) => {
 };
 
 export const getUserProfile = async (req, res) => {
- 
   const UserId = req.user.UserId;
 
   try {
-   
     const connection = await poolBody.connect();
     const request = connection.request();
     request.input("UserId", UserId);
@@ -303,16 +293,13 @@ export const getUserProfile = async (req, res) => {
       "SELECT NameUser, LastName, Email, UserId, DateBirth, ProfilePicture FROM Users WHERE UserId = @UserId"
     );
 
-    
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
-   
     const userProfile = result.recordset[0];
-    userProfile.DateBirth = formatDate(userProfile.DateBirth); 
+    userProfile.DateBirth = formatDate(userProfile.DateBirth);
 
-    
     io.emit("userConnected", { UserId: UserId });
 
     return res.status(200).json(userProfile);
@@ -322,14 +309,12 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-
 function formatDate(dateString) {
   const date = new Date(dateString);
   const year = date.getFullYear();
   let month = date.getMonth() + 1;
   let day = date.getDate();
 
-  
   if (month < 10) {
     month = `0${month}`;
   }
@@ -345,12 +330,10 @@ export const updateUserProfile = async (req, res) => {
   const { UserId } = req.user;
 
   try {
-    
     if (!NameUser || !LastName || !Email || !DateBirth) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    
     let profilePicturePath = null;
     if (req.file) {
       profilePicturePath = req.file.path.replace(/\\/g, "/");
@@ -359,7 +342,6 @@ export const updateUserProfile = async (req, res) => {
     const connection = await poolBody.connect();
     const request = connection.request();
 
-    
     request.input("UserId", UserId);
     request.input("NameUser", escapeString(NameUser));
     request.input("LastName", escapeString(LastName));
@@ -369,7 +351,6 @@ export const updateUserProfile = async (req, res) => {
       request.input("profilePicture", escapeString(profilePicturePath));
     }
 
-    
     let query = `
       UPDATE Users
       SET NameUser = @NameUser, LastName = @LastName, Email = @Email, DateBirth = @DateBirth
@@ -379,7 +360,6 @@ export const updateUserProfile = async (req, res) => {
     }
     query += " WHERE UserId = @UserId";
 
-    
     await request.query(query);
 
     await connection.close();
