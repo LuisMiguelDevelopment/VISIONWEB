@@ -1,0 +1,49 @@
+.profile_Friend {
+    position: absolute; 
+    bottom: 60px;
+    right: 50%;
+    transform: translate(50%);
+    background-color: white;
+    border-radius: 15px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content:space-evenly;
+    align-items: center;
+    width: 200px;
+}
+
+
+.img{
+    height: 100px;
+    width: 100px;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+
+.info_friend{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.span{
+    color:  #74acf0;
+}
+
+
+.container_close{
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+}

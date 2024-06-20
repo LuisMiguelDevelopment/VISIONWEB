@@ -28,6 +28,55 @@ export const ListFriends = async (req, res) => {
 
 
 
+
+export const getFriendProfile = async (req, res) => {
+  const friendId = parseInt(req.params.friendId);
+  const userId = req.user.UserId;
+
+  try {
+    const connection = await poolBody.connect();
+    const request = connection.request();
+
+    request.input("userId", userId);
+    request.input("friendId", friendId);
+    const friendshipCheck = await request.query(
+      `SELECT COUNT(*) AS friendshipExists
+       FROM FriendsList
+       WHERE (UserId1 = @userId AND UserId2 = @friendId)
+       OR (UserId1 = @friendId AND UserId2 = @userId)`
+    );
+
+    if (friendshipCheck.recordset[0].friendshipExists === 0) {
+      await connection.close();
+      return res.status(403).json({ message: "You are not friends with this user" });
+    }
+
+    const friendDetails = await request.query(
+      `SELECT UserId, NameUser, LastName, ProfilePicture
+       FROM Users
+       WHERE UserId = @friendId`
+    );
+
+    if (friendDetails.recordset.length === 0) {
+      await connection.close();
+      return res.status(404).json({ message: "Friend not found" });
+    }
+
+    await connection.close();
+
+    return res.status(200).json({ friendProfile: friendDetails.recordset[0] });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error retrieving friend profile" });
+  }
+};
+
+
+
+
+
+
+
 export const requestFriend = (io) => {
   io.on("connection", (socket) => {
     socket.on("setUserId2", (userId) => {

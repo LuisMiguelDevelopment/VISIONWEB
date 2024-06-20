@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import {
   getMyFriends,
   getRequestFriends,
+  getFriendProfile,
   sendFriends,
   acceptFriendRequest,
   deleteRequestFriend
@@ -27,8 +28,9 @@ export const FriendProvider = ({ children }) => {
   const [requestList, setRequestList] = useState({ friendRequests: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [profileFriend, setProfileFriend] = useState(null); // Asegúrate de que profileFriend sea inicializado correctamente
   const { user } = useAuth();
-  
+
   useEffect(() => {
     if (user) {
       const userId = user.UserId;
@@ -58,6 +60,15 @@ export const FriendProvider = ({ children }) => {
     }
   };
 
+  const fetchFriendsProfile = async (friendId) => {
+    try {
+      const res = await getFriendProfile(friendId); 
+      setProfileFriend(res.data.friendProfile); // Make sure to set `friendProfile` from the response
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchFriends();
@@ -79,7 +90,7 @@ export const FriendProvider = ({ children }) => {
   useEffect(() => {
     socket.on("acceptSend", (data) => {
       console.log("Solicitud de amistad aceptada:", data);
-      fetchFriends();  
+      fetchFriends();
     });
 
     return () => {
@@ -135,7 +146,9 @@ export const FriendProvider = ({ children }) => {
     sendFriendRequest,
     requestList,
     acceptRequest,
-    rejectRequest
+    rejectRequest,
+    fetchFriendsProfile,
+    profileFriend
   };
 
   return (
