@@ -9,9 +9,6 @@ const Profile_Slider = () => {
     const { profile, getImageUrl } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    if (!profile) {
-        return <div>Loading...</div>;
-    }
 
     const { NameUser, LastName, ProfilePicture } = profile;
 
@@ -28,7 +25,7 @@ const Profile_Slider = () => {
             <div className={styles.info_friend}>
                 <img 
                     className={styles.image_profile} 
-                    src={ProfilePicture ? getImageUrl(ProfilePicture) : '/defaultProfilePic.png'} 
+                    src={ProfilePicture ? getImageUrl(ProfilePicture) : '/profile.webp'} 
                     alt={`${NameUser} ${LastName}`} 
                     width={100} 
                     height={100} 

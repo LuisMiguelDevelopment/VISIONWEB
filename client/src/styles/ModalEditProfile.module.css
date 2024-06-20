@@ -57,6 +57,16 @@
   padding: 3px 10px;
 }
 
+
+.logoutButton{
+  border-radius: 30px;
+  border: none;
+  color: white;
+  margin: 2px;
+  background-color: #c6082e;
+  padding: 3px 10px;
+}
+
 .editInput {
   /* Estilos para el input en modo de edición */
   padding: 5px;

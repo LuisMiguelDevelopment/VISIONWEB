@@ -1,11 +1,10 @@
-.container_friend{
-    background-color: #ffffff;
-    border-radius: 20px;
-    display: flex;
-    justify-content: space-between;
-    height: 50px;
-    margin-top: 5px;
-    
+.container_friend {
+  background-color: #ffffff;
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  height: 50px;
+  margin-top: 5px;
 }
 
 .info_friend{

@@ -4,7 +4,7 @@ import { poolBody } from '../config/db.js';
 
 export const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization;
-   // Supongamos que el token se envía en el encabezado de autorización
+   
    console.log('Token received:', token);
 
   if (!token) {
@@ -15,7 +15,7 @@ export const verifyToken = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
 
-    // Actualizar la sesión del usuario en la base de datos
+    
     await updateSession(decoded.UserId);
 
     next();

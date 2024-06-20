@@ -13,6 +13,9 @@ import UserIsBusy from "./UserIsBusy";
 import alarmaAudio from "../../public/alarma.mp3";
 import { IoCloseOutline } from "react-icons/io5";
 import Profile from "./Profile_edit";
+import { useFriend } from "@/context/friendContext";
+import { useRouter } from "next/router";
+
 
 const VideoCall = () => {
   const {
@@ -31,8 +34,17 @@ const VideoCall = () => {
     userIsBusy,
     setUserIsBusy,
     handleCloseIsBusy,
-    callIsBusyClose
+    callIsBusyClose,
+    image,
+    imageFriend
   } = useCall();
+
+
+  const { friendList } = useFriend();
+
+  const { isAuthenticated } = useAuth();
+
+  const router = useRouter();
 
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
@@ -46,6 +58,29 @@ const VideoCall = () => {
   const { user } = useAuth();
   const [callEnd, setCallEnd] = useState(false);
 
+
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [!isAuthenticated, router]);
+
+
+
+  useEffect(() => {
+
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+
+        userVideoRef.current.srcObject = stream;
+        console.log("Tipo de stream:", typeof stream);
+      })
+      .catch((error) => {
+        console.error("Error accessing user media:", error);
+      });
+  }, []);
 
   const handleCallAccept = () => {
     const peer = new Peer({ initiator: false, trickle: false, stream: stream });
@@ -102,7 +137,7 @@ const VideoCall = () => {
     setCallReceived(false);
     setShowAnswerButton(false);
     socket.emit("hangupCall", { from: caller, to: tocall });
-    setUserIsBusy(false); // Reset the userIsBusy state when call is hung up
+    setUserIsBusy(false);
   };
 
   useEffect(() => {
@@ -110,7 +145,7 @@ const VideoCall = () => {
       setCallReceived(false);
       setShowAnswerButton(false);
       console.log("La llamada fue cancelada:", data);
-      setUserIsBusy(false); // Reset the userIsBusy state when call is cancelled
+      setUserIsBusy(false);
     };
 
     socket.on("callCancelled", handleCallCancelled);
@@ -125,7 +160,7 @@ const VideoCall = () => {
       setCallReceived(false);
       setCallAccepted(false);
       setCallEnd(true);
-      setUserIsBusy(false); // Reset the userIsBusy state when call is cancelled
+      setUserIsBusy(false);
     };
 
     socket.on("callCancelled", handleCallCancelled);
@@ -193,15 +228,12 @@ const VideoCall = () => {
     }
   }, [callReceived, callAccepted]);
 
-
-  
-
   return (
     <div className={styles.general}>
       {userIsBusy && !callIsBusyClose && (
         <UserIsBusy handleClose={handleCloseIsBusy} />
       )}
-      
+
       <div className={styles.container_videos}>
         <div
           className={`${styles.border_video} ${callActive ? "" : styles.hidden}`}
@@ -254,6 +286,8 @@ const VideoCall = () => {
             UserName={userName}
             UserCall={userNameCall}
             isReceiver={user.UserId === tocall}
+            image={image}
+            imageFriend={imageFriend}
           />
         )}
       </div>

@@ -31,7 +31,8 @@ export const CallProvider = ({ children }) => {
   const [stream, setStream] = useState();
   const [userIsBusy , setUserIsBusy] = useState(false);
   const [callIsBusyClose, setCallIsBusyClose] = useState(false);
-
+  const [ image , setImage ] = useState("");
+  const [ imageFriend , setImageFriend ] = useState("");
 
   const { user } = useAuth();
 
@@ -88,7 +89,8 @@ export const CallProvider = ({ children }) => {
       console.log(signal);
 
       if (stream) {
-        console.log(stream);
+        console.log(callData);
+        
         socket.emit("callUser", {
           ...callData,
           signal: signal,
@@ -116,6 +118,9 @@ export const CallProvider = ({ children }) => {
       setCallerStream(data.stream);
       setUserName(data.name);
       setUserNameCall(data.nameCall);
+      setImage(data.profileImage);
+      setImageFriend(data.profileImageFriend);
+     
     });
 
     return () => {
@@ -132,10 +137,6 @@ export const CallProvider = ({ children }) => {
   };
 
 
-
- 
-  
-
   useEffect(() => {
     socket.on('callFailed', (data) => {
       console.log(data);
@@ -150,18 +151,18 @@ export const CallProvider = ({ children }) => {
 
   const handleCloseIsBusy = () => {
     setCallIsBusyClose(true);
-    setUserIsBusy(false); // Reset userIsBusy when the busy modal is closed
+    setUserIsBusy(false); 
   };
 
 
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      // Mostrar mensaje de confirmación
+     
       const confirmationMessage = "¿Estás seguro que quieres salir y terminar la llamada?";
       event.preventDefault();
-      event.returnValue = confirmationMessage; // Standard-compliant browsers
-      return confirmationMessage; // Old IE
+      event.returnValue = confirmationMessage; 
+      return confirmationMessage; 
     };
   
     const handleUnload = () => {
@@ -169,7 +170,7 @@ export const CallProvider = ({ children }) => {
         myPeer.destroy();
         setMyPeer(null);
   
-        // Emitir el evento de colgar llamada
+        
         socket.emit("hangupCall", { from: tocall, to: caller });
       }
     };
@@ -187,7 +188,7 @@ export const CallProvider = ({ children }) => {
 
 
   return (
-    // En CallProvider
+   
     <CallContext.Provider
       value={{
         calls,
@@ -210,7 +211,9 @@ export const CallProvider = ({ children }) => {
         userIsBusy,
         setUserIsBusy,
         handleCloseIsBusy,
-        callIsBusyClose
+        callIsBusyClose,
+        image,
+        imageFriend
       }}
     >
       {children}

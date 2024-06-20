@@ -12,7 +12,7 @@ export const ListFriends = async (req, res) => {
     request.input("userId", userId);
 
     const friendList = await request.query(
-      `SELECT u.UserId, u.NameUser, u.LastName
+      `SELECT u.UserId, u.NameUser, u.LastName, u.ProfilePicture
       FROM Users u
       JOIN FriendsList fl ON (u.UserId = fl.UserId1 OR u.UserId = fl.UserId2)
       WHERE u.UserId != @userId AND (fl.UserId1 = @userId OR fl.UserId2 = @userId)`
@@ -94,6 +94,7 @@ export const getFriendRequest = async (req, res) => {
     request.input("userId", userId);
     const friendRequests = await request.query(
       `SELECT u.NameUser AS RequestingUserName, u.LastName AS RequestingUserLastName, 
+              u.ProfilePicture,
               f.FriendRequestId, f.Status, f.RequestingUserId, f.RequestedUserId
        FROM Friends f
        JOIN Users u ON f.RequestingUserId = u.UserId
@@ -107,7 +108,6 @@ export const getFriendRequest = async (req, res) => {
     res.status(500).json({ message: "Error getting friend requests" });
   }
 };
-
 
 export const sendFriendRequest = async (req, res) => {
   const { requestedUserId } = req.body;

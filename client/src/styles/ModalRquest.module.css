@@ -68,6 +68,7 @@
   color: white;
   border-radius: 50%;
   margin-right: 10px;
+  cursor: pointer;
 }
 
 .icons {
@@ -77,10 +78,19 @@
 
 .button_check {
   background-color: #1cd793;
+  
 }
 
 .button_close {
   background-color: #c6082e;
+}
+.button_check:hover {
+  background-color: #19bd81;
+  
+}
+
+.button_close:hover {
+  background-color: #a70626;
 }
 
 .open {
