@@ -61,6 +61,8 @@
   bottom: 0;
 }
 
+
+
 @media screen and (max-width: 850px) {
   .container {
     transform: translateX(100%); 

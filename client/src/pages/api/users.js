@@ -5,6 +5,8 @@ export const profileRequest = () => axios.get(`/profile`)
 
 export const searchUsers = (name) => axios.get('/search', {params:{name}})
 
+export const searchFriendsRequest = (name) => axios.get('/search-friend', {params:{name}})
+
 export const  loginRequest = user => axios.post(`/login`,user);
 
 export const  logoutRequest = user => axios.post(`/logout`,user);

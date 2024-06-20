@@ -1,6 +1,6 @@
 // users.routes.js
 import { Router } from 'express';
-import { getUsers,  registerUser, loginUser, logout, sendRecoveryEmail, resetPassword  , getUserProfile , searchUser, updateUserProfile} from '../controllers/users.controller.js';
+import { getUsers,  registerUser, loginUser, logout, sendRecoveryEmail, resetPassword  , getUserProfile , searchUser,searchFriends ,  updateUserProfile} from '../controllers/users.controller.js';
 import { CheckEmailExistRegister, hashPassword, hashNewPassword, comparePassword, verifyToken, requiredUser } from '../middlewares/user.Middleware.js';
 import { validateSchema } from '../middlewares/validator.middlewares.js';
 import { loginSchema } from '../schema/user.schema.js';
@@ -13,7 +13,7 @@ const router = Router();
 router.get('/users', getUsers);
 router.get('/profile', verifyToken , getUserProfile );
 router.get('/search',verifyToken , searchUser  );
-
+router.get('/search-friend', verifyToken, searchFriends)
 
 /* POST */
 router.post('/register', CheckEmailExistRegister, hashPassword, registerUser);

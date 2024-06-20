@@ -1,3 +1,5 @@
+// ListFriends.jsx
+
 import React, { useEffect, useState } from "react";
 import styles from "../styles/ListFriend.module.css";
 import { PiVideoCameraFill } from "react-icons/pi";
@@ -6,25 +8,23 @@ import { useFriend } from "../context/friendContext";
 import { useAuth } from "../context/authContext";
 import Cookies from "js-cookie";
 import { useCall } from "../context/CallContext";
-
+import SearchFriends from "./SearchFriends"; // Asegúrate de importar el componente Search
 
 const ListFriends = () => {
   const { friendList } = useFriend();
-  const { user, profile, getImageUrl } = useAuth();
+  const { user, profile, getImageUrl, searchResultsFriends } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
   const [socket, setSocket] = useState(null);
   const { handleCall } = useCall();
+  const [filteredFriends, setFilteredFriends] = useState([]);
 
   useEffect(() => {
     if (profile) {
       console.log(profile.NameUser);
     }
   }, [user]);
-  
-
-  /**********************  USER ONLINE *********************/
 
   useEffect(() => {
     const connectToSocket = async () => {
@@ -46,7 +46,7 @@ const ListFriends = () => {
         };
       }
     };
-  
+
     connectToSocket();
   }, [userId, token, user]);
 
@@ -61,14 +61,10 @@ const ListFriends = () => {
     autoConnect();
   }, [user]);
 
- 
   const isFriendOnline = (friendUserId) => {
     return onlineUsers.includes(String(friendUserId));
   };
 
-  /**********************  USER ONLINE *********************/
-
-  /**********************  CLICK CALL YOUR FRIEND *********************/
   const handleCallClick = (friendUserId, friendName, friend) => {
     if (socket) {
       handleCall({
@@ -76,29 +72,37 @@ const ListFriends = () => {
         from: userId,
         name: profile.NameUser,
         nameCall: friend.NameUser,
-        profileImage: profile.ProfilePicture, 
-        profileImageFriend: friend.ProfilePicture, 
+        profileImage: profile.ProfilePicture,
+        profileImageFriend: friend.ProfilePicture,
       });
     } else {
       console.error("Socket is not available");
     }
   };
 
-  /**********************  CLICK CALL YOUR FRIEND *********************/
+  useEffect(() => {
+    if (searchResultsFriends.length > 0) {
+      setFilteredFriends(searchResultsFriends);
+    } else {
+      setFilteredFriends(friendList);
+    }
+  }, [searchResultsFriends, friendList]);
 
   return (
     <>
-      {friendList.map((friend, index) => {
-        const profilePictureUrl = friend.ProfilePicture 
+      <SearchFriends text="Buscar amigos..." /> {/* Pasa las props necesarias */}
+      {filteredFriends.map((friend, index) => {
+        const profilePictureUrl = friend.ProfilePicture
           ? getImageUrl(friend.ProfilePicture)
-          : '/profile.webp';
+          : "/profile.webp";
 
         return (
+          
           <div key={index} className={styles.container_friend}>
             <div className={styles.info_friend}>
-              <img 
-                className={styles.image_profile} 
-                src={profilePictureUrl} 
+              <img
+                className={styles.image_profile}
+                src={profilePictureUrl}
                 alt={`${friend.NameUser}'s profile picture`}
               />
               <span className={styles.span}>{friend.NameUser}</span>
@@ -106,10 +110,21 @@ const ListFriends = () => {
             <div className={styles.options}>
               <PiVideoCameraFill
                 className={styles.camera}
-                onClick={() => handleCallClick(friend.UserId, friend.NameUser, friend, friend.ProfilePicture )}
+                onClick={() =>
+                  handleCallClick(
+                    friend.UserId,
+                    friend.NameUser,
+                    friend,
+                    friend.ProfilePicture
+                  )
+                }
               />
               <div
-                className={`${styles.indicator} ${isFriendOnline(friend.UserId) ? styles.online : styles.offline}`}
+                className={`${styles.indicator} ${
+                  isFriendOnline(friend.UserId)
+                    ? styles.online
+                    : styles.offline
+                }`}
               ></div>
             </div>
           </div>

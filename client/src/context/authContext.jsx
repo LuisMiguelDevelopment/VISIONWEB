@@ -7,7 +7,8 @@ import {
   updatePasswordRequest,
   searchUsers,
   updateProfileRequest,
-  logoutRequest
+  logoutRequest,
+  searchFriendsRequest
 } from "../pages/api/users";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
   const [errors, setErrors] = useState([]);
   const [profile, setProfile] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const [searchResultsFriends, setSearchResultsFriends] = useState([]);
   const [image, setImage] = useState('');
   const router = useRouter();
 
@@ -110,6 +112,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const searchFriends = async (name) => {
+    try {
+      const res = await searchFriendsRequest(name);
+      setSearchResultsFriends(res.data);
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
 
   useEffect(() => {
     const authenticateUser = async () => {
@@ -166,11 +178,7 @@ export const AuthProvider = ({ children }) => {
   };
 
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login");
-    }
-  }, [!isAuthenticated, router]);
+  
 
   const authContextValue = {
     signin,
@@ -186,7 +194,9 @@ export const AuthProvider = ({ children }) => {
     search,
     updateProfile,
     getImageUrl,
-    logout
+    logout,
+    searchResultsFriends,
+    searchFriends 
   };
 
 

@@ -66,6 +66,51 @@ export const searchUser = async (req, res) => {
   }
 };
 
+
+
+
+export const searchFriends = async (req, res) => {
+  const { name } = req.query;
+  const userId = req.user.UserId;
+
+  if (!name) {
+    return res.status(400).json({ message: "Missing name parameter" });
+  }
+  if (!userId) {
+    return res.status(400).json({ message: "Missing userId parameter" });
+  }
+
+  try {
+    const connection = await poolBody.connect();
+    const request = connection.request();
+    request.input("Name", `%${name}%`);
+    request.input("UserId", userId);
+
+    const result = await request.query(`
+      SELECT U.* 
+      FROM Users U
+      INNER JOIN FriendsList F ON (U.UserId = F.UserId1 OR U.UserId = F.UserId2)
+      WHERE (F.UserId1 = @UserId OR F.UserId2 = @UserId)
+      AND CONCAT(U.NameUser, ' ', U.LastName) LIKE @Name
+      AND U.UserId != @UserId  -- Exclude the current user
+    `);
+
+    await connection.close();
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No friends found with the provided name" });
+    }
+
+    const friends = result.recordset;
+    return res.status(200).json(friends);
+  } catch (error) {
+    console.error("Error searching friends by name:", error);
+    return res.status(500).json({ message: "Error searching friends by name" });
+  }
+};
+
+
+
 export const registerUser = async (req, res) => {
   const { NameUser, LastName, Email, PasswordKey, DateBirth } = req.body;
   try {

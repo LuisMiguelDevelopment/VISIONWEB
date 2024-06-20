@@ -14,6 +14,8 @@ import alarmaAudio from "../../public/alarma.mp3";
 import { IoCloseOutline } from "react-icons/io5";
 import Profile from "./Profile_edit";
 import { useFriend } from "@/context/friendContext";
+import { useRouter } from "next/router";
+
 
 const VideoCall = () => {
   const {
@@ -34,11 +36,15 @@ const VideoCall = () => {
     handleCloseIsBusy,
     callIsBusyClose,
     image,
-    imageFriend 
+    imageFriend
   } = useCall();
 
 
   const { friendList } = useFriend();
+
+  const { isAuthenticated } = useAuth();
+
+  const router = useRouter();
 
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
@@ -55,11 +61,19 @@ const VideoCall = () => {
 
 
   useEffect(() => {
-    
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [!isAuthenticated, router]);
+
+
+
+  useEffect(() => {
+
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
-       
+
         userVideoRef.current.srcObject = stream;
         console.log("Tipo de stream:", typeof stream);
       })
@@ -123,7 +137,7 @@ const VideoCall = () => {
     setCallReceived(false);
     setShowAnswerButton(false);
     socket.emit("hangupCall", { from: caller, to: tocall });
-    setUserIsBusy(false); 
+    setUserIsBusy(false);
   };
 
   useEffect(() => {
@@ -131,7 +145,7 @@ const VideoCall = () => {
       setCallReceived(false);
       setShowAnswerButton(false);
       console.log("La llamada fue cancelada:", data);
-      setUserIsBusy(false); 
+      setUserIsBusy(false);
     };
 
     socket.on("callCancelled", handleCallCancelled);
@@ -146,7 +160,7 @@ const VideoCall = () => {
       setCallReceived(false);
       setCallAccepted(false);
       setCallEnd(true);
-      setUserIsBusy(false); 
+      setUserIsBusy(false);
     };
 
     socket.on("callCancelled", handleCallCancelled);
@@ -272,8 +286,8 @@ const VideoCall = () => {
             UserName={userName}
             UserCall={userNameCall}
             isReceiver={user.UserId === tocall}
-            image={image} 
-            imageFriend={imageFriend} 
+            image={image}
+            imageFriend={imageFriend}
           />
         )}
       </div>

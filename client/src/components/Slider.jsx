@@ -23,9 +23,6 @@ const Slider = ({ children, handleCall }) => {
       </div>
 
       <div className={`${styles.container} ${isMenuOpen ? styles.mobile_menu: ''}`}>
-        <div className={styles.container_search}>
-          <Search text={"Search my friends"} />
-        </div>
         <div className={styles.list_friends}>
           <ListFriends handleCall={handleCall} />
         </div>
