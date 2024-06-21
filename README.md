@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VISION WEB</title>
-</head>
-<body>
+
   <h1>VISION WEB</h1>
 
   <a href="https://youtu.be/PicAjEIeEo0?si=lc0vxQfPyHf_DZ83">Video Vision Web</a>
@@ -59,5 +52,4 @@ BASE_URL=http://localhost:3000/
   </ul>
 
   <h1>Thanks</h1>
-</body>
-</html>
+
