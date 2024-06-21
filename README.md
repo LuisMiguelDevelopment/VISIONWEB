@@ -32,6 +32,7 @@
   <ul>
     <li>SERVER</li>
     <ul>
+      <li>cd server</li>
       <li>npm install</li>
       <li>Create a file named <code>.env</code> with the following content:</li>
     </ul>
@@ -51,6 +52,7 @@ BASE_URL=http://localhost:3000/
     </ul>
     <li>CLIENT</li>
     <ul>
+      <li>cd client</li>
       <li>npm install</li>
       <li>npm run dev</li>
     </ul>
