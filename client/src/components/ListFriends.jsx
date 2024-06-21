@@ -10,7 +10,7 @@ import SearchFriends from "./SearchFriends";
 import FriendProfile from "./FriendProfile";
 
 const ListFriends = () => {
-  const { friendList, fetchFriendsProfile, deleteFriend } = useFriend(); // Asegúrate de incluir deleteFriend desde useFriend
+  const { friendList, fetchFriendsProfile, deleteFriend, profileFriend } = useFriend(); // Incluye profileFriend
   const { user, profile, getImageUrl, searchResultsFriends } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [userId, setUserId] = useState(null);
@@ -138,7 +138,7 @@ const ListFriends = () => {
             </div>
             {isOpen && (
               <FriendProfile
-                profileFriend={profile}
+                profileFriend={profileFriend} // Pasa profileFriend en lugar de profile
                 onClose={() => setSelectedFriendId(null)} // Función para cerrar el perfil
                 deleteFriend={() => deleteFriend(friend.UserId)} // Asegúrate de pasar deleteFriend correctamente
               />
