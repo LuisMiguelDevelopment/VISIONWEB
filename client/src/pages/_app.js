@@ -10,7 +10,6 @@ export default function App({ Component, pageProps }) {
       <Head>
         <title>VISIONWEB</title>
         <link rel="icon" href="/VISIONWEBLOGO.png" />{" "}
-        
       </Head>
       <AuthProvider>
         <FriendProvider>

@@ -64,7 +64,8 @@ export const FriendProvider = ({ children }) => {
   const fetchFriendsProfile = async (friendId) => {
     try {
       const res = await getFriendProfile(friendId); 
-      setProfileFriend(res.data.friendProfile); // Asegúrate de setear `friendProfile` desde la respuesta
+      setProfileFriend(res.data.friendProfile);
+      console.log(res.data.friendProfile);
     } catch (error) {
       console.log(error);
     }

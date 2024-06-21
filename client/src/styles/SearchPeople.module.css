@@ -11,11 +11,9 @@
   align-items: center;
 }
 
-
-.list_users{
+.list_users {
   display: flex;
 }
-
 
 .customSearch {
   background-color: #ececec;
@@ -49,38 +47,35 @@
   border-radius: 15px;
 }
 
-
-.list_users{
+.list_users {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.info_users{
+.info_users {
   display: flex;
   margin: 10px;
 }
 
-.li{
+.li {
   margin: 10px;
 }
 
-
-.image_profile{
+.image_profile {
   width: 40px;
   height: 40px;
   object-fit: cover;
   border-radius: 50px;
-  margin: 0 5px
+  margin: 0 5px;
 }
 
-
-.requestButton{
+.requestButton {
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #1CD793 ;
+  background-color: #1cd793;
   border-radius: 50%;
   color: white;
   height: 30px;
@@ -88,17 +83,20 @@
   font-size: 1.5rem;
   cursor: pointer;
 }
-.requestButton:hover{
-  background-color: #16b47a ;
+.requestButton:hover {
+  background-color: #16b47a;
 }
 
+@media screen and (max-width: 850px) {
+  .searchPeople {
+    margin-top: 20px;
+  }
+}
 
-
-@media screen and (max-width:600px ) {
+@media screen and (max-width: 600px) {
   .search_input {
     position: absolute;
     top: 60px;
     z-index: 1001;
   }
-  
 }
