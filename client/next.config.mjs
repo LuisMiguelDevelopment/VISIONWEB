@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    domains: ['localhost'],
+  },
   webpack: (config, { isServer }) => {
     const { module: { rules } } = config;
     rules.push({
@@ -24,4 +27,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-
