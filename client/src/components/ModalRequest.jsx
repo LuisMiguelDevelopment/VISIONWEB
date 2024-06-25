@@ -4,6 +4,7 @@ import { FaCheck } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { useFriend } from "../context/friendContext";
 import { useAuth } from "../context/authContext";
+import Image from "next/image";
 
 const ModalRequest = ({ modalRequest, setModalRequest }) => {
   const { requestList, acceptRequest, rejectRequest } = useFriend();
@@ -46,7 +47,7 @@ const ModalRequest = ({ modalRequest, setModalRequest }) => {
           pendingRequests.map((request) => (
             <div key={request.FriendRequestId} className={styles.info_friend}>
               <div className={styles.info_request}>
-                <img
+                <Image
                   className={styles.image_profile}
                   src={getProfilePictureUrl(request)} 
                   alt="Profile"

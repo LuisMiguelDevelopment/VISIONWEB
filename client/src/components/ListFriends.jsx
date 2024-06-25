@@ -8,7 +8,7 @@ import Cookies from "js-cookie";
 import { useCall } from "../context/CallContext";
 import SearchFriends from "./SearchFriends";
 import FriendProfile from "./FriendProfile";
-
+import Image from "next/image";
 const ListFriends = () => {
   const { friendList, fetchFriendsProfile, deleteFriend, profileFriend } = useFriend(); // Incluye profileFriend
   const { user, profile, getImageUrl, searchResultsFriends } = useAuth();
@@ -110,11 +110,13 @@ const ListFriends = () => {
         return (
           <div key={index} className={styles.container_friend}>
             <div className={styles.info_friend}>
-              <img
+              <Image
                 className={styles.image_profile}
                 src={profilePictureUrl}
                 alt={`${friend.NameUser}'s profile picture`}
                 onClick={() => handleClickFriendProfile(friend.UserId)}
+                width={40} 
+                height={40} 
               />
               <span className={styles.span}>{friend.NameUser}</span>
             </div>

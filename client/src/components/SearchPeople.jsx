@@ -6,7 +6,7 @@ import { useAuth } from "../context/authContext";
 import { useFriend } from "../context/friendContext";
 import ModalRequest from "./ModalRequest";
 import { IoIosSend } from "react-icons/io";
-
+import Image from "next/image";
 const SearchPeople = () => {
   const { search, searchResults, getImageUrl } = useAuth();
   const { sendFriendRequest } = useFriend();
@@ -47,7 +47,7 @@ const SearchPeople = () => {
                   {searchResults.map((person) => (
                     <div className={styles.list_users} key={person.UserId}>
                       <div className={styles.info_users}>
-                        <img
+                        <Image
                           className={styles.image_profile}
                           src={getProfilePictureUrl(person)}
                           alt={`${person.NameUser} ${person.LastName}`}

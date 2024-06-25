@@ -31,7 +31,7 @@ const ModalCall = ({ handleCallAccept, handleCancell, UserName, UserCall, isRece
       <div className={styles.modal_info}>
         <div className={styles.modal_img}>
           {isReceiver && (
-            <img
+            <Image
               src={profileImage || "/profile.webp"} 
               alt="Profile Image"
               width={100}
@@ -40,7 +40,7 @@ const ModalCall = ({ handleCallAccept, handleCancell, UserName, UserCall, isRece
             />
           )}
           {!isReceiver && (
-            <img
+            <Image
               src={profileImageFriend || "/profile.webp"} 
               alt="Profile Image"
               width={100}
